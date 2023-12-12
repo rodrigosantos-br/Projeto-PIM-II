@@ -14,6 +14,7 @@ void ExibirMenuPrincipal();
 int NumerarIngresso(int ingresso);
 void ImprimirDataHoraAtual();
 void EfetuarNovaVenda();
+void IncrementarTipoIngressoVendido();
 char VerificarFormaDePagamento(int idade, char *formaDePagamento);
 float CalcularValorDoIngresso(int idade);
 void ListarVendas();
@@ -151,10 +152,14 @@ void EfetuarNovaVenda()
   vendas[quantidadeTotalIngresso].ingresso = quantidadeTotalIngresso;
   vendas[quantidadeTotalIngresso].preco = CalcularValorDoIngresso(vendas[quantidadeTotalIngresso].idade);
 
+  IncrementarTipoIngressoVendido();
+}
+void IncrementarTipoIngressoVendido()
+{
   ingressoInteiro += (vendas[quantidadeTotalIngresso].idade >= 16 && vendas[quantidadeTotalIngresso].idade < 60);
   ingressoMeia += (vendas[quantidadeTotalIngresso].idade < 16);
   ingressoIsento += (vendas[quantidadeTotalIngresso].idade >= 60);
-  quantidadeTotalIngresso++;  
+  quantidadeTotalIngresso++;
 }
 char VerificarFormaDePagamento(int idade, char *formaDePagamento) 
 {
@@ -288,7 +293,7 @@ void ExibirMenuAdministrativo()
         break;
       case '2':
         //TODO
-        // **Adicionar código para alterar o pre�o dos ingressos**
+        // **Adicionar código para alterar o preço dos ingressos**
         break;
       case '3':
         //TODO
