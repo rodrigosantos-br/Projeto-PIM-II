@@ -13,15 +13,13 @@ void GerarLogotipo();
 void ExibirMenuPrincipal();
 int NumerarIngresso(int ingresso);
 void ImprimirDataHoraAtual();
-void EfetuarNovaVenda();
-void IncrementarTipoIngressoVendido();
 char VerificarFormaDePagamento(int idade, char *formaDePagamento);
 float CalcularValorDoIngresso(int idade);
-void ListarVendas();
 void AutenticarUsuario();
 void ExibirMenuAdministrativo();
 void RelatorioVendas();
 void AlterarSenha();
+void AlterarPrecoIngresso();
 
 struct Vendas 
 {  
@@ -58,12 +56,44 @@ int main()
       case '1':
         system("cls");        
         GerarLogotipo();
-        EfetuarNovaVenda();
+        printf("\n\n\t\t\t### ** Nova Venda ** ###");
+        printf("\n\n\t\t--------------- Ingresso %d ---------------\n\n", NumerarIngresso(vendas[quantidadeTotalIngresso].ingresso));
+        ImprimirDataHoraAtual();
+        printf("\n\t\t### Digite o nome: ");
+        scanf("\t %[^\n]", &vendas[quantidadeTotalIngresso].nome);
+        fflush(stdin);      
+        printf("\t\t### Digite a idade: ");
+        scanf("%d", &vendas[quantidadeTotalIngresso].idade);
+        getchar();
+        VerificarFormaDePagamento(vendas[quantidadeTotalIngresso].idade, vendas[quantidadeTotalIngresso].formaDePagamento);
+
+        vendas[quantidadeTotalIngresso].ingresso = quantidadeTotalIngresso;
+        vendas[quantidadeTotalIngresso].preco = CalcularValorDoIngresso(vendas[quantidadeTotalIngresso].idade);
+
+        ingressoInteiro += (vendas[quantidadeTotalIngresso].idade >= 16 && vendas[quantidadeTotalIngresso].idade < 60);
+        ingressoMeia += (vendas[quantidadeTotalIngresso].idade < 16);
+        ingressoIsento += (vendas[quantidadeTotalIngresso].idade >= 60);
+        quantidadeTotalIngresso++;
         break;
       case '2':
         system("cls");
         GerarLogotipo();
-        ListarVendas(quantidadeTotalIngresso);
+        printf("\n\t\t\t\t** Lista de Vendas **\n\n");
+        printf("\t-----------------------------------------------------------------------------------\n");
+        for(int i=0; i<quantidadeTotalIngresso; i++)
+        {
+          printf("\t\t\t###############  Ingresso - %d  ###############\n", (vendas[i].ingresso + 1));
+          dataHoraVenda = vendas[i].dataHora;
+          printf("\t\t\tData: %02d/%02d/%02d  \t  Horário: %02d:%02d\n",
+          dataHoraVenda.tm_mday, dataHoraVenda.tm_mon + 1, dataHoraVenda.tm_year + 1900,
+          dataHoraVenda.tm_hour, dataHoraVenda.tm_min);          
+          printf("\t\t\tNome: %s\n", vendas[i].nome);
+          printf("\t\t\tIdade: %d anos\n", vendas[i].idade);
+          printf("\t\t\tPreço: R$%.2f\n", vendas[i].preco);
+          printf("\t\t\tTipo Pagamento: %s\n\n", vendas[i].formaDePagamento);
+          printf("\t-----------------------------------------------------------------------------------\n");
+        }
+        getch();
         break;
       case '3':
         system("cls");
@@ -103,12 +133,12 @@ void GerarLogotipo()
 }
 void ExibirMenuPrincipal() 
 {
-  printf("\n\n### ** Menu Principal **");
-  printf("\n\n### 1. Nova Venda");
-  printf("\n### 2. Listar Vendas");
-  printf("\n### 3. Administração");
-  printf("\n### 0. Sair\n\n\n");
-  printf("### Digite a opção: ");
+  printf("\n\n\t### ** Menu Principal **");
+  printf("\n\n\t### 1. Nova Venda");
+  printf("\n\t### 2. Listar Vendas");
+  printf("\n\t### 3. Administração");
+  printf("\n\t### 0. Sair\n\n\n");
+  printf("\t### Digite a opção: ");
 }
 int NumerarIngresso(int ingresso) 
 {
@@ -124,43 +154,13 @@ void ImprimirDataHoraAtual()
   dataHoraAtual = localtime(&segundos);
 
   // Imprime a data e a hora
-  printf("%02d/%02d/%02d    %02d:%02d",
+  printf("\t\t### Data: %02d/%02d/%02d  \t  Horário: %02d:%02d ###",
       dataHoraAtual->tm_mday, dataHoraAtual->tm_mon + 1, dataHoraAtual->tm_year + 1900,
       dataHoraAtual->tm_hour, dataHoraAtual->tm_min);
   vendas[quantidadeTotalIngresso].dataHora = *dataHoraAtual;
   dataHoraVenda = *dataHoraAtual;
 }
-void EfetuarNovaVenda() 
-{
-  gotoxy(12, 7);
-  printf("** Nova Venda **\n");
-  gotoxy(10, 9);
-  ImprimirDataHoraAtual();
-  gotoxy(10, 10);
-  printf("---- Ingresso %d ----\n", NumerarIngresso(vendas[quantidadeTotalIngresso].ingresso));
-  gotoxy(10, 11);
-  printf("Digite o nome: ");
-  scanf(" %[^\n]", &vendas[quantidadeTotalIngresso].nome);
-  fflush(stdin);
-  gotoxy(10, 12);
-  printf("Digite a idade: ");
-  scanf("%d", &vendas[quantidadeTotalIngresso].idade);
-  gotoxy(10, 13);
-  getchar();
-  VerificarFormaDePagamento(vendas[quantidadeTotalIngresso].idade, vendas[quantidadeTotalIngresso].formaDePagamento);
 
-  vendas[quantidadeTotalIngresso].ingresso = quantidadeTotalIngresso;
-  vendas[quantidadeTotalIngresso].preco = CalcularValorDoIngresso(vendas[quantidadeTotalIngresso].idade);
-
-  IncrementarTipoIngressoVendido();
-}
-void IncrementarTipoIngressoVendido()
-{
-  ingressoInteiro += (vendas[quantidadeTotalIngresso].idade >= 16 && vendas[quantidadeTotalIngresso].idade < 60);
-  ingressoMeia += (vendas[quantidadeTotalIngresso].idade < 16);
-  ingressoIsento += (vendas[quantidadeTotalIngresso].idade >= 60);
-  quantidadeTotalIngresso++;
-}
 char VerificarFormaDePagamento(int idade, char *formaDePagamento) 
 {
   int opcao;
@@ -173,16 +173,14 @@ char VerificarFormaDePagamento(int idade, char *formaDePagamento)
     }
     else
     {
-      gotoxy(10, 14);
-      printf("1.Pix | 2.Cartão  | 3.Dinheiro");
-      gotoxy(10, 16);
-      printf("Forma de Pagamento: ");
+      printf("\n\t\t### 1.Pix | 2.Cartão  | 3.Dinheiro");
+      printf("\n\n\t\t### Forma de Pagamento: ");
       scanf("%d", &opcao);
       getchar();
       if (opcao < 1 || opcao > 3) 
       {
         gotoxy(6, 18);
-        printf("Opção Inválida. Por favor digite uma opcão entre 1 e 3");
+        printf("### Opção Inválida. Por favor digite uma opcão entre 1 e 3");
       }
     }
   }while(opcao < 1 || opcao > 3);
@@ -201,34 +199,13 @@ char VerificarFormaDePagamento(int idade, char *formaDePagamento)
   } 
   return *formaDePagamento;
 }
-//valorIngresso pode retornar uma string se achar mais fácil para alterar valor do ingresso
 float CalcularValorDoIngresso(int idade) 
 { 
-  return (idade> 0 && idade <= 16) ? 10.00 : (idade >= 60 && idade <=110) ? 0.00 : 20.00;
+  float meia = 10.00;
+  float inteiro = 20.00;
+  float isento = 0.00;
+  return (idade> 0 && idade <= 16) ? meia : (idade >= 60 && idade <=110) ? isento : inteiro;
 }
-//TODO: Corrigir a data e a hora, está imprimindo a atual quando deveria estar imprimindo o dia e horário da venda
-void ListarVendas() 
-{
-  GerarLogotipo();
-  gotoxy(32, 6);
-  printf("** Lista de Vendas **\n");
-  printf("------------------------------");
-  for(int i=0; i<quantidadeTotalIngresso; i++)
-  {
-    dataHoraVenda = vendas[i].dataHora;
-    printf("\n%02d/%02d/%02d    %02d:%02d\n",
-        dataHoraVenda.tm_mday, dataHoraVenda.tm_mon + 1, dataHoraVenda.tm_year + 1900,
-        dataHoraVenda.tm_hour, dataHoraVenda.tm_min);
-    printf("Ingresso %d\n", (vendas[i].ingresso + 1));
-    printf("Nome: %s\n", vendas[i].nome);
-    printf("Idade: %d anos\n", vendas[i].idade);
-    printf("Preço: R$%.2f\n", vendas[i].preco);
-    printf("Tipo Pagamento: %s\n\n", vendas[i].formaDePagamento);
-    printf("------------------------------");
-  }
-  getch();
-}
-
 void AutenticarUsuario()
 {
   char senha[20];
@@ -239,30 +216,30 @@ void AutenticarUsuario()
   {
     system("cls");
     GerarLogotipo();
-    printf("\n### Administração - Digite o nome de usuário e a senha para continuar\n\n");
-    printf("### Nome de Usuário: ");
+    printf("\n\n\t### Administração - Digite o nome de usuário e a senha para continuar\n\n");
+    printf("\t### Nome de Usuário: ");
     scanf("%s",&nomeUsuario);
-    printf("### Senha: ");
+    printf("\t### Senha: ");
     scanf("%s",&senha);
     fflush(stdin);
     
     if((strcmp(senha, confirmacaoSenha) == 0) && (strcmp(nomeUsuario, confirmacaoDeNomeUsuario) == 0)) 
     {
-      printf("### Nome de usuário e senha corretos!\n\nPressione qualquer tecla para continuar");
+      printf("\t### Nome de usuário e senha corretos!\n\n\t### Pressione qualquer tecla para continuar");
       getch();
       ExibirMenuAdministrativo();
     }
     else 
     {
       tentativas--;
-      printf("\nNome de usuário e/ou senha inválidos!\n\n");
-      printf("%d tentativas restantes\n\n", tentativas);
+      printf("\n\t### Nome de usuário e/ou senha inválidos!\n\n");
+      printf("\t### %d tentativas restantes\n\n", tentativas);
       getch();
     }
   }
   if(tentativas == 0)
   {
-    printf("Você excedeu o número de tentativas.\n");
+    printf("\t### Você excedeu o número de tentativas.\n");
     getch();
   }
 }
@@ -273,14 +250,14 @@ void ExibirMenuAdministrativo()
   {    
     system("cls");
     GerarLogotipo();
-    printf("\n### ** Administração **\n\n");
-    printf("### 1. Relatório de vendas\n");
-    printf("### 2. Alterar preço do ingresso\n");
-    printf("### 3. Lista de clientes\n");
-    printf("### 4. Controle de acervo\n");
-    printf("### 5. Aterar Senha\n");
-    printf("### 0. Voltar ao menu anterior\n\n\n");
-    printf("### Digite a opção: ");
+    printf("\n\t### ** Administração **\n\n");
+    printf("\t### 1. Relatório de vendas\n");
+    printf("\t### 2. Alterar preço do ingresso\n");
+    printf("\t### 3. Lista de clientes\n");
+    printf("\t### 4. Controle de acervo\n");
+    printf("\t### 5. Aterar Senha\n");
+    printf("\t### 0. Voltar ao menu anterior\n\n\n");
+    printf("\t### Digite a opção: ");
     scanf(" %c", &opcao);
     fflush(stdin);
 
@@ -288,12 +265,17 @@ void ExibirMenuAdministrativo()
     {
       case '1':
         system("cls");
-        RelatorioVendas();
+        GerarLogotipo();
+        printf("\n\n\t\t### Ingressos inteiros: %d\t-\tValor ingressos inteiros: R$%.2f\n", ingressoInteiro, ingressoInteiro*20.00);
+        printf("\t\t### Ingressos meia: %d\t\t-\tValor ingressos meia: R$%.2f\n", ingressoMeia, ingressoMeia*10.00);
+        printf("\t\t### Ingressos isento: %d\n", ingressoIsento);
+        printf("\n\n\t\t### Total de vendas: %d ingressos.\t-\tValor total: R$%.2f", quantidadeTotalIngresso, (ingressoInteiro*20.00+ingressoMeia*10.00));
         getch();
         break;
       case '2':
-        //TODO
-        // **Adicionar código para alterar o preço dos ingressos**
+        system("cls");
+        AlterarPrecoIngresso();
+        getch();
         break;
       case '3':
         //TODO
@@ -321,13 +303,7 @@ void ExibirMenuAdministrativo()
 }
 void RelatorioVendas()
 {
-  printf("Total de vendas: %d\n", quantidadeTotalIngresso);
-  printf("Valor total das vendas: %.2f\n\n", ingressoInteiro*20.00+ingressoMeia*10.00);
-  printf("Total de inteiras: %d\n", ingressoInteiro);
-  printf("Valor total de inteiras: %.2f\n\n", ingressoInteiro*20.00);
-  printf("Total de meia: %d\n", ingressoMeia);
-  printf("Valor total de meia: %.2f\n\n", ingressoMeia*10.00);
-  printf("Total de isento: %d\n", ingressoIsento);
+  
 }
 void AlterarSenha()
 {
@@ -343,13 +319,14 @@ void AlterarSenha()
   while(tentativas > 0)
   {
     system("cls");
-    printf("Digite a senha atual: ");
+    GerarLogotipo();
+    printf("\n\n\t### Digite a senha atual: ");
     scanf("%s", &senhaAtual);
     if (strcmp(senhaAtual, confirmacaoSenha) != 0) 
     {
       tentativas--;
-      printf("A senha atual está incorreta.\n\n");
-      printf("%d tentativas restantes\n\n", tentativas);
+      printf("\n\t### A senha atual está incorreta.\n\n");
+      printf("\t### %d tentativas restantes\n\n", tentativas);
       getch();
     }
     else
@@ -357,29 +334,29 @@ void AlterarSenha()
       // Solicita as novas informações
       do
       {
-        printf("Digite o novo nome de usuário: ");
+        printf("\n\t### Digite o novo nome de usuário: ");
         scanf("%s", &novoNomeUsuario);
 
-        printf("Confirme o novo nome de usuário: ");
+        printf("\t### Confirme o novo nome de usuário: ");
         scanf("%s", &confirmacaoNovoNomeUsuario);
 
         if (strcmp(novoNomeUsuario, confirmacaoNovoNomeUsuario) != 0) 
         {
-          printf("Os nomes de usuário não coincidem. Tente novamente.\n");
+          printf("\n\t### Os nomes de usuário não coincidem. Tente novamente.\n");
         }  
       }while (strcmp(novoNomeUsuario, confirmacaoNovoNomeUsuario) != 0);
 
       do 
       {
-        printf("Digite a nova senha: ");
+        printf("\n\t### Digite a nova senha: ");
         scanf("%s", &novaSenha);
 
-        printf("Confirme a nova senha: ");
+        printf("\t### Confirme a nova senha: ");
         scanf("%s", &confirmacaoNovaSenha);
 
         if (strcmp(novaSenha, confirmacaoNovaSenha) != 0) 
         {
-          printf("As senhas não coincidem. Tente novamente.\n");
+          printf("\n\t### As senhas não coincidem. Tente novamente.\n");
         }
       }while (strcmp(novaSenha, confirmacaoNovaSenha) != 0);
 
@@ -387,11 +364,15 @@ void AlterarSenha()
         strcpy(confirmacaoDeNomeUsuario, novoNomeUsuario);
         strcpy(confirmacaoSenha, novaSenha);
 
-        printf("Senha alterada com sucesso!\n");
+        printf("\n\t### Senha alterada com sucesso!\n");
         getch();
         ExibirMenuAdministrativo();
     }
   }
+}
+void AlterarPrecoIngresso()
+{
+  
 }
 
   
