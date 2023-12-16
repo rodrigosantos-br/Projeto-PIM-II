@@ -17,7 +17,6 @@ char VerificarFormaDePagamento(int idade, char *formaDePagamento);
 float CalcularValorDoIngresso(int idade);
 void AutenticarUsuario();
 void ExibirMenuAdministrativo();
-void RelatorioVendas();
 void AlterarSenha();
 void AlterarPrecoIngresso();
 
@@ -266,7 +265,7 @@ void ExibirMenuAdministrativo()
       case '1':
         system("cls");
         GerarLogotipo();
-        printf("\n\n\t\t### Ingressos inteiros: %d\t-\tValor ingressos inteiros: R$%.2f\n", ingressoInteiro, ingressoInteiro*20.00);
+        printf("\n\n\t\t### Ingressos inteiro: %d\t-\tValor ingressos inteiro: R$%.2f\n", ingressoInteiro, ingressoInteiro*20.00);
         printf("\t\t### Ingressos meia: %d\t\t-\tValor ingressos meia: R$%.2f\n", ingressoMeia, ingressoMeia*10.00);
         printf("\t\t### Ingressos isento: %d\n", ingressoIsento);
         printf("\n\n\t\t### Total de vendas: %d ingressos.\t-\tValor total: R$%.2f", quantidadeTotalIngresso, (ingressoInteiro*20.00+ingressoMeia*10.00));
@@ -301,10 +300,7 @@ void ExibirMenuAdministrativo()
     }
   }while(opcao != '0');
 }
-void RelatorioVendas()
-{
-  
-}
+
 void AlterarSenha()
 {
   // Declara as variáveis
