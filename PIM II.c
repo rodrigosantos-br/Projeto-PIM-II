@@ -467,102 +467,116 @@ void AdicionarAcervo(){
     fclose(fp);
     do
     {
-      printf("\nDeseja Cadastrar outro obra ( S / N ): ");
+      printf("\n\t### Deseja Cadastrar outro obra ( S / N ): ");
       scanf(" %c", &CadastrarObras);
       CadastrarObras = toupper(CadastrarObras);
     } while( CadastrarObras != 'S' && CadastrarObras != 'N' );
-  } while( CadastrarObras == 'S' );
+  } while( CadastrarObras == 'S');
   fflush(stdin);
 }
-void ExcluirAcervo() {
-    FILE *fp, *temp;
-    char linha[500], nomeExcluir[50];
-    int linhaEncontrada = 0;
+void ExcluirAcervo() 
+{
+  FILE *fp, *temp;
+  char linha[500], nomeExcluir[50];
+  int linhaEncontrada = 0;
 
-    printf("Digite o nome da obra que deseja excluir: ");
-    scanf(" %[^\n]", nomeExcluir);
+  printf("Digite o nome da obra que deseja excluir: ");
+  scanf(" %[^\n]", nomeExcluir);
 
-    if ((fp = fopen("obras.csv", "r")) == NULL) {
-        printf("\n\t### Erro na abertura do arquivo obras.csv !\n\n");
-        return;
+  if ((fp = fopen("obras.csv", "r")) == NULL) 
+  {
+      printf("\n\t### Erro na abertura do arquivo obras.csv !\n\n");
+      return;
+  }
+
+  if ((temp = fopen("temp.csv", "w")) == NULL) 
+  {
+      printf("\n\t### Erro na abertura do arquivo temporário !\n\n");
+      fclose(fp);
+      return;
+  }
+
+  // Ignorar a primeira linha, que é o cabeçalho
+  fgets(linha, sizeof(linha), fp);
+  fputs(linha, temp); // Copiar o cabeçalho para o arquivo temporário
+
+  while (fgets(linha, sizeof(linha), fp) != NULL) 
+  {
+    char nome[50], fabricante[50], dataDeFabricacao[30], importanciaHistorica[250], conservacao[250];
+
+    // Ler os dados do arquivo
+    sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%[^\n]",
+            nome, fabricante, dataDeFabricacao, importanciaHistorica, conservacao);
+
+    // Comparar o nome lido com o nome a ser excluído
+    if (strcmp(nome, nomeExcluir) == 0) 
+    {
+        linhaEncontrada = 1; // Marcar que a linha foi encontrada
+    } 
+    else 
+    {
+        fputs(linha, temp); // Copiar as outras linhas para o arquivo temporário
     }
+  }
 
-    if ((temp = fopen("temp.csv", "w")) == NULL) {
-        printf("\n\t### Erro na abertura do arquivo temporário !\n\n");
-        fclose(fp);
-        return;
-    }
+  fclose(fp);
+  fclose(temp);
 
-    // Ignorar a primeira linha, que é o cabeçalho
-    fgets(linha, sizeof(linha), fp);
-    fputs(linha, temp); // Copiar o cabeçalho para o arquivo temporário
-
-    while (fgets(linha, sizeof(linha), fp) != NULL) {
-        char nome[50], fabricante[50], dataDeFabricacao[30], importanciaHistorica[250], conservacao[250];
-
-        // Ler os dados do arquivo
-        sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%[^\n]",
-               nome, fabricante, dataDeFabricacao, importanciaHistorica, conservacao);
-
-        // Comparar o nome lido com o nome a ser excluído
-        if (strcmp(nome, nomeExcluir) == 0) {
-            linhaEncontrada = 1; // Marcar que a linha foi encontrada
-        } else {
-            fputs(linha, temp); // Copiar as outras linhas para o arquivo temporário
-        }
-    }
-
-    fclose(fp);
-    fclose(temp);
-
-    if (!linhaEncontrada) {
-        printf("Obra com o nome '%s' não encontrada.\n", nomeExcluir);
-        remove("temp.csv"); // Remover o arquivo temporário, já que não houve alterações
-    } else {
-        remove("obras.csv"); // Remover o arquivo original
-        rename("temp.csv", "obras.csv"); // Renomear o arquivo temporário para substituir o original
-        printf("Obra com o nome '%s' foi excluída com sucesso.\n", nomeExcluir);
-    }
+  if (!linhaEncontrada) 
+  {
+      printf("Obra com o nome '%s' não encontrada.\n", nomeExcluir);
+      remove("temp.csv"); // Remover o arquivo temporário, já que não houve alterações
+  } 
+  else 
+  {
+      remove("obras.csv"); // Remover o arquivo original
+      rename("temp.csv", "obras.csv"); // Renomear o arquivo temporário para substituir o original
+      printf("Obra com o nome '%s' foi excluída com sucesso.\n", nomeExcluir);
+  }
 }
 
 
-void ListarAcervo() {
-    FILE *fp;
-    char linha[500];
-    int linhasLidas = 0;
+void ListarAcervo() 
+{
+  FILE *fp;
+  char linha[500];
+  int linhasLidas = 0;
 
-    if ((fp = fopen("obras.csv", "r")) == NULL) {
-        printf("\n\t### Erro na abertura do arquivo obras.csv !\n\n");
-        return;
-    }
+  if ((fp = fopen("obras.csv", "r")) == NULL) 
+  {
+      printf("\n\t### Erro na abertura do arquivo obras.csv !\n\n");
+      return;
+  }
 
-    printf("\n\n\t\t\t    ### ** Lista de Obras ** ###\n");
+  printf("\n\n\t\t\t    ### ** Lista de Obras ** ###\n");
 
-    // Ignorar a primeira linha, que é o cabeçalho
-    fgets(linha, sizeof(linha), fp);
+  // Ignorar a primeira linha, que é o cabeçalho
+  fgets(linha, sizeof(linha), fp);
 
-    while (fgets(linha, sizeof(linha), fp) != NULL) {
-        char nome[50], fabricante[50], dataDeFabricacao[30], importanciaHistorica[250], conservacao[250];
+  while (fgets(linha, sizeof(linha), fp) != NULL) 
+  {
+    char nome[50], fabricante[50], dataDeFabricacao[30], importanciaHistorica[250], conservacao[250];
 
-        // Ler os dados do arquivo
-        sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%[^\n]",
-               &nome, fabricante, dataDeFabricacao, importanciaHistorica, conservacao);
+    // Ler os dados do arquivo
+    sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%[^\n]",
+            &nome, fabricante, dataDeFabricacao, importanciaHistorica, conservacao);
 
-        
-        printf("\n\t\t--------------------------------------------------------------------------");
-        printf("\n\t\t\t### Nome:\t\t\t  %s", nome);
-        printf("\n\t\t\t### Fabricante:\t\t\t %s", fabricante);
-        printf("\n\t\t\t### Data de Fabricação:\t\t  %s", dataDeFabricacao);
-        printf("\n\t\t\t### Importância Histórica:\t %s", importanciaHistorica);
-        printf("\n\t\t\t### Conservação:\t\t  %s", conservacao);
-        linhasLidas++;
-    }
+    
+    printf("\n\t\t--------------------------------------------------------------------------");
+    printf("\n\t\t\t### Nome:\t\t\t  %s", nome);
+    printf("\n\t\t\t### Fabricante:\t\t\t %s", fabricante);
+    printf("\n\t\t\t### Data de Fabricação:\t\t  %s", dataDeFabricacao);
+    printf("\n\t\t\t### Importância Histórica:\t %s", importanciaHistorica);
+    printf("\n\t\t\t### Conservação:\t\t  %s", conservacao);
+    linhasLidas++;
+  }
 
-    fclose(fp);
+  fclose(fp);
 
-    if (linhasLidas == 0) {
-        printf("\n\n\n\n\n\n\n\t\t\t### Nenhuma obra encontrada. ###");
-    }
+  if (linhasLidas == 0) 
+  {
+      printf("\n\n\n\n\n\n\n\t\t\t### Nenhuma obra encontrada. ###");
+  }
 }
 
 
