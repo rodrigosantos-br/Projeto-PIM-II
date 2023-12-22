@@ -94,7 +94,7 @@ int main()
         system("cls");
         exibir_logotipo();
         autenticar_usuario();
-        
+        fflush(stdin);
         break;
       case '0':
         system("cls");
@@ -155,6 +155,7 @@ void menu_administrativo()
         system("cls");
         exibir_logotipo();
         alterar_senha();
+        fflush(stdin);
         break;
       case '0':
         system("cls");
