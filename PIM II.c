@@ -154,7 +154,7 @@ void menu_administrativo()
       case '5':
         system("cls");
         exibir_logotipo();
-            
+        alterar_senha();
         break;
       case '0':
         system("cls");
@@ -338,7 +338,7 @@ void relatorio_de_vendas()
   getch();
 }
 //---------------------------------------------------------------------------------------------
-void AlterarSenha()
+void alterar_senha()
 {
   // Declara as variáveis
   char senha_atual[20];
