@@ -3,7 +3,6 @@
 #include<ctype.h>
 #include<conio.h>
 #include<string.h>
-#include<unistd.h>
 #include<locale.h>
 #include<time.h>
 #include<Windows.h>
@@ -91,6 +90,7 @@ int main()
         system("cls");
         exibir_logotipo();
         listar_vendas();
+        getch();
         break;
       case '3':
         system("cls");
@@ -297,7 +297,6 @@ void listar_vendas()
     printf("\t\t\t| Preço:................... R$%.2f \t\t\t\t   |\n", vendas[i].preco);
     printf("\t\t\t| Tipo Pagamento:.......... %s \t\t\t\t   |\n", vendas[i].forma_de_pagamento);
     printf("\t\t\t|------------------------------------------------------------------|\n\n");
-    getch();
   }
 }
 //---------------------------------------------------------------------------------------------
