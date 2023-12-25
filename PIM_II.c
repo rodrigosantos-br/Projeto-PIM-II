@@ -46,7 +46,7 @@ int numerar_ingresso(int ingresso);
 void imprimir_data_hora_atual();
 void criptografar_descriptografar(char senha[]);
 int criar_senhas_padrao();
-int autenticar_usuario(char usuario[], char senha[]);
+int autenticar_usuario();
 int trocar_senha(char *nova_senha);
 void formatar_nome(char *nome_completo);
 int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
@@ -95,12 +95,6 @@ int main()
       case '3':
         system("cls");
         exibir_logotipo();
-        printf("Digite o nome de usuário: ");
-        scanf("%s", usuario);
-        printf("Digite a senha: ");
-        scanf("%s", senha);
-        fflush(stdin);
-
         int resultado_autenticacao = autenticar_usuario(usuario, senha);
         if (resultado_autenticacao == 1) 
         {
@@ -363,11 +357,13 @@ int criar_senhas_padrao() {
     scanf("%s", nome_de_usuario_padrao);
     printf("Defina a nova senha: ");
     scanf("%s", senha_padrao);
+    fflush(stdin);
 
     arquivo = fopen("senhas.dat", "wb");
     if (arquivo == NULL) 
     {
       printf("Erro ao criar o arquivo.\n");
+      getch();
       exit(1);
     }
 
@@ -379,17 +375,20 @@ int criar_senhas_padrao() {
     fclose(arquivo);
 
     printf("Credenciais padrão criadas com sucesso.\n");
+    getch();
     return 1;
   }
   return 0;
 }
 
 
-int autenticar_usuario(char usuario[], char senha[]) 
+int autenticar_usuario() 
 {
   FILE *arquivo;
   char nome_de_usuario_arquivo[50];
   char senha_criptografada[50];
+  char usuario[20];
+  char senha[20];
 
   if (criar_senhas_padrao()) 
   {
@@ -402,6 +401,12 @@ int autenticar_usuario(char usuario[], char senha[])
     printf("Erro ao abrir o arquivo.\n");
     exit(1);
   }
+  
+  printf("Digite o nome de usuário: ");
+  scanf("%s", usuario);
+  printf("Digite a senha: ");
+  scanf("%s", senha);
+  fflush(stdin);
 
   fgets(nome_de_usuario_arquivo, sizeof(nome_de_usuario_arquivo), arquivo);
   nome_de_usuario_arquivo[strcspn(nome_de_usuario_arquivo, "\n")] = '\0';
