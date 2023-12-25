@@ -3,9 +3,12 @@
 #include<ctype.h>
 #include<conio.h>
 #include<string.h>
+#include<unistd.h>
 #include<locale.h>
 #include<time.h>
 #include<Windows.h>
+
+#define MAX_LENGTH 50
 
 typedef struct Obras
 {
@@ -28,8 +31,6 @@ struct Vendas
 
 struct tm data_hora_venda;
 
-char confirmacao_nome_de_usuario[20] = "admin";
-char confirmacao_senha[20] = "admin";
 int quantidade_total_de_obras=0;
 int quantidade_total_de_ingressos=0;
 int ingresso_inteiro = 0, ingresso_meia = 0, ingresso_isento = 0;
@@ -37,19 +38,20 @@ int ingresso_inteiro = 0, ingresso_meia = 0, ingresso_isento = 0;
 // ### Protótipos das Funções ###
 void menu_administrativo();
 void menu_acervo();
-void gotoxy(int x, int y);
 void exibir_logotipo();
 void efetuar_nova_venda();
 void listar_vendas();
 void incrementar_tipo_de_ingresso_vendido();
-void autenticar_usuario();
 void relatorio_de_vendas();
-void formatar_nome(char *nome_completo);
-void alterar_senha();
-int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
-int validar_data(char *data);
 int numerar_ingresso(int ingresso);
 void imprimir_data_hora_atual();
+void criptografar_descriptografar(char senha[]);
+int criar_senhas_padrao();
+int autenticar_usuario(char usuario[], char senha[]);
+int trocar_senha(char *nova_senha);
+void formatar_nome(char *nome_completo);
+int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
+int validar_data(char *data);
 char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento);
 float calcular_valor_do_ingresso(int idade);
 void alterar_preco_do_ingresso();
@@ -61,7 +63,9 @@ void listar_acervo();
 int main() 
 {
   setlocale(LC_ALL, "es_US.UTF-8");
-  
+
+  char usuario[20];
+  char senha[20];
   char opcao;
   do 
   {
@@ -73,7 +77,6 @@ int main()
     printf("\n\t### 0. Sair\n\n\n");
     printf("\t### Digite a opção: ");
     scanf("%c", &opcao);
-    getchar();
     fflush(stdin);
 
     switch(opcao) 
@@ -88,17 +91,29 @@ int main()
         system("cls");
         exibir_logotipo();
         listar_vendas();
-        getch();
         break;
       case '3':
         system("cls");
         exibir_logotipo();
-        autenticar_usuario();
+        printf("Digite o nome de usuário: ");
+        scanf("%s", usuario);
+        printf("Digite a senha: ");
+        scanf("%s", senha);
         fflush(stdin);
+
+        int resultado_autenticacao = autenticar_usuario(usuario, senha);
+        if (resultado_autenticacao == 1) 
+        {
+        menu_administrativo();
+        } 
+        else if (resultado_autenticacao == 0) 
+        {
+        printf("Credenciais incorretas. Tente novamente.\n");
+        getch();
+        }
         break;
       case '0':
         system("cls");
-        gotoxy(10, 20);
         printf("Encerrando......\n");
         getch();
         exit(1);
@@ -113,6 +128,8 @@ int main()
 //---------------------------------------------------------------------------------------------
 void menu_administrativo() 
 {
+  char usuario_atual[20];
+  char senha_atual[20];
   char opcao;
   do 
   {    
@@ -123,7 +140,7 @@ void menu_administrativo()
     printf("\t### 2. Alterar preço do ingresso\n");
     printf("\t### 3. Lista de clientes\n");
     printf("\t### 4. Controle de acervo\n");
-    printf("\t### 5. Aterar Senha\n");
+    printf("\t### 5. Alterar Senha\n");
     printf("\t### 0. Voltar ao menu anterior\n\n\n");
     printf("\t### Digite a opção: ");
     scanf(" %c", &opcao);
@@ -154,7 +171,21 @@ void menu_administrativo()
       case '5':
         system("cls");
         exibir_logotipo();
-        alterar_senha();
+        printf("Digite o usuário atual: ");
+        scanf("%s", usuario_atual);
+        printf("Digite a senha atual: ");
+        scanf("%s", senha_atual);
+
+        if (trocar_senha(senha_atual)) 
+        {
+        printf("Troca de senha realizada com sucesso.\n");
+        getch();
+        } 
+        else 
+        {
+        printf("Falha ao trocar a senha.\n");
+        getch();
+        }
         fflush(stdin);
         break;
       case '0':
@@ -216,33 +247,23 @@ void menu_acervo()
   } while (opcao != 0);
 }
 //---------------------------------------------------------------------------------------------
-void gotoxy(int x, int y) 
-{
-    COORD coord;
-    coord.X = x;
-    coord.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-}
-//---------------------------------------------------------------------------------------------
+
 void exibir_logotipo() 
 {
     system("cls");
-    gotoxy(45, 2);
-    printf("#########################\n");
-    gotoxy(45, 3);
-    printf("#    **MUSEU TECH**     #");
-    gotoxy(45, 4);
-    printf("#########################\n");
+    printf("\t\t\t\t\t\t#########################\n");
+    printf("\t\t\t\t\t\t#    **MUSEU TECH**     #\n");
+    printf("\t\t\t\t\t\t#########################\n");
 }
 //---------------------------------------------------------------------------------------------
 void efetuar_nova_venda()
 {
-  printf("\n\n\t\t\t### ** Nova Venda ** ###");
+  printf("\n\n\t\t\t\t### ** Nova Venda ** ###");
   printf("\n\n\t\t\t--------------- Ingresso %d ---------------\n\n", 
           numerar_ingresso(vendas[quantidade_total_de_ingressos].ingresso));
   imprimir_data_hora_atual();
   printf("\n\t\t\t### Digite o nome: ");
-  scanf("\t %[^\n]", &vendas[quantidade_total_de_ingressos].nome);
+  scanf("\t %[^\n]", vendas[quantidade_total_de_ingressos].nome);
   formatar_nome(vendas[quantidade_total_de_ingressos].nome);
   fflush(stdin);         
   printf("\t\t\t### Digite a idade: ");
@@ -259,7 +280,7 @@ void efetuar_nova_venda()
 //---------------------------------------------------------------------------------------------
 void listar_vendas()
 {
-  printf("\n\t\t\t\t\t      ** Lista de Vendas **\n\n");
+  printf("\n\t\t\t\t\t\t  ** Lista de Vendas **\n\n");
   
   for(int i=0; i<quantidade_total_de_ingressos; i++)
   {
@@ -276,6 +297,7 @@ void listar_vendas()
     printf("\t\t\t| Preço:................... R$%.2f \t\t\t\t   |\n", vendas[i].preco);
     printf("\t\t\t| Tipo Pagamento:.......... %s \t\t\t\t   |\n", vendas[i].forma_de_pagamento);
     printf("\t\t\t|------------------------------------------------------------------|\n\n");
+    getch();
   }
 }
 //---------------------------------------------------------------------------------------------
@@ -288,45 +310,6 @@ void incrementar_tipo_de_ingresso_vendido()
   quantidade_total_de_ingressos++;
 }
 //---------------------------------------------------------------------------------------------
-void autenticar_usuario()
-{
-  
-  char senha[20];
-  char nome_de_usuario[20];
-  int tentativas = 3;
-
-  while(tentativas > 0)
-  {
-    system("cls");
-    exibir_logotipo();
-    printf("\n\n\t### Administração - Digite o nome de usuário e a senha para continuar\n\n");
-    printf("\t### Nome de Usuário: ");
-    scanf("%s",&nome_de_usuario);
-    printf("\t### Senha: ");
-    scanf("%s",&senha);
-    fflush(stdin);
-    
-    if((strcmp(senha, confirmacao_senha) == 0) && (strcmp(nome_de_usuario, confirmacao_nome_de_usuario) == 0)) 
-    {
-      printf("\t### Nome de usuário e senha corretos!\n\n\t### Pressione qualquer tecla para continuar");
-      getch();
-      menu_administrativo();
-    }
-    else 
-    {
-      tentativas--;
-      printf("\n\t### Nome de usuário e/ou senha inválidos!\n\n");
-      printf("\t### %d tentativas restantes\n\n", tentativas);
-      getch();
-    }
-  }
-  if(tentativas == 0)
-  {
-    printf("\t### Você excedeu o número de tentativas.\n");
-    getch();
-  }
-}
-//---------------------------------------------------------------------------------------------
 void relatorio_de_vendas()
 {
   printf("\n\n\t\t### Ingressos inteiro: %d\t-\tValor ingressos inteiro: R$%.2f\n", 
@@ -337,118 +320,6 @@ void relatorio_de_vendas()
   printf("\n\n\t\t### Total de vendas: %d ingressos.\t-\tValor total: R$%.2f", 
           quantidade_total_de_ingressos, (ingresso_inteiro*20.00+ingresso_meia*10.00));
   getch();
-}
-//---------------------------------------------------------------------------------------------
-void alterar_senha()
-{
-  // Declara as variáveis
-  char senha_atual[20];
-  char novo_nome_de_usuario[20];
-  char nova_senha[20];
-  char confirmacao_novo_nome_de_usuario[20];
-  char confimacao_nova_senha[20];
-  int tentativas = 3;
-
-  // Valida a senha atual
-  while(tentativas > 0)
-  {
-    system("cls");
-    exibir_logotipo();
-    printf("\n\n\t### Digite a senha atual: ");
-    scanf("%s", &senha_atual);
-    if (strcmp(senha_atual, confirmacao_senha) != 0) 
-    {
-      tentativas--;
-      printf("\n\t### A senha atual está incorreta.\n\n");
-      printf("\t### %d tentativas restantes\n\n", tentativas);
-      getch();
-    }
-    else
-    {
-      // Solicita as novas informações
-      do
-      {
-        printf("\n\t### Digite o novo nome de usuário: ");
-        scanf("%s", &novo_nome_de_usuario);
-
-        printf("\t### Confirme o novo nome de usuário: ");
-        scanf("%s", &confirmacao_novo_nome_de_usuario);
-
-        if (strcmp(novo_nome_de_usuario, confirmacao_novo_nome_de_usuario) != 0) 
-        {
-          printf("\n\t### Os nomes de usuário não coincidem. Tente novamente.\n");
-        }  
-      }while (strcmp(novo_nome_de_usuario, confirmacao_novo_nome_de_usuario) != 0);
-
-      do 
-      {
-        printf("\n\t### Digite a nova senha: ");
-        scanf("%s", &nova_senha);
-
-        printf("\t### Confirme a nova senha: ");
-        scanf("%s", &confimacao_nova_senha);
-
-        if (strcmp(nova_senha, confimacao_nova_senha) != 0) 
-        {
-          printf("\n\t### As senhas não coincidem. Tente novamente.\n");
-        }
-      }while (strcmp(nova_senha, confimacao_nova_senha) != 0);
-
-        // Atribui as novas informações
-        strcpy(confirmacao_novo_nome_de_usuario, novo_nome_de_usuario);
-        strcpy(confirmacao_senha, nova_senha);
-
-        printf("\n\t### Senha alterada com sucesso!\n");
-        getch();
-        menu_administrativo();
-    }
-  }
-}
-//---------------------------------------------------------------------------------------------
-void formatar_nome(char *nome_completo) {
-  int tamanho = strlen(nome_completo);
-  int i;
-
-  // Transforma o primeiro caractere em maiúscula
-  nome_completo[0] = toupper(nome_completo[0]);
-
-  // Percorre a string para encontrar espaços e transformar a próxima letra em maiúscula
-  for (i = 1; i < tamanho; i++) 
-  {
-    // Verifica se o caractere anterior é um espaço e se o caractere atual é uma letra
-    if (nome_completo[i - 1] == ' ' && isalpha(nome_completo[i])) 
-    {
-        nome_completo[i] = toupper(nome_completo[i]);
-    }
-  }
-}
-//---------------------------------------------------------------------------------------------
-int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]) 
-{
-  int limite = indice + 1; // Considerando o índice baseado em 0
-  if (strlen(entrada_do_usuario) > limite) 
-  {
-    printf("Você excedeu o limite de caracteres.\n");
-    return 0; // Retorna 0 se exceder o limite
-  }
-  return 1; // Retorna 1 se for válido
-}
-//---------------------------------------------------------------------------------------------
-int validar_data(char *data) 
-{
-    int dia, mes, ano;
-    char barra1, barra2;
-    // Verifica se a entrada tem o formato esperado
-    if (sscanf(data, "%d %c %d %c %d", &dia, &barra1, &mes, &barra2, &ano) != 5)
-    {
-        return 0;
-    }
-    // Verifica se as barras estão no lugar correto e se os valores são válidos
-    if (barra1 != '/' || barra2 != '/' || dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1900 || ano > 2100) 
-    {
-        return 0;
-    }
-    return 1;
 }
 //---------------------------------------------------------------------------------------------
 int numerar_ingresso(int ingresso) 
@@ -473,6 +344,193 @@ void imprimir_data_hora_atual()
   data_hora_venda = *data_horaAtual;
 }
 //---------------------------------------------------------------------------------------------
+void criptografar_descriptografar(char senha[]) {
+  char chave = 'K'; // Chave de criptografia
+
+  for (int i = 0; i < (int)strlen(senha); i++) 
+  {
+    senha[i] = senha[i] ^ chave; // Operação XOR com a chave
+  }
+}
+//---------------------------------------------------------------------------------------------
+int criar_senhas_padrao() {
+  FILE *arquivo;
+  char nome_de_usuario_padrao[50];
+  char senha_padrao[50];
+
+  if ((arquivo = fopen("senhas.dat", "rb")) == NULL) 
+  {
+    printf("Primeiro acesso. Defina o novo login: ");
+    scanf("%s", nome_de_usuario_padrao);
+    printf("Defina a nova senha: ");
+    scanf("%s", senha_padrao);
+
+    arquivo = fopen("senhas.dat", "wb");
+    if (arquivo == NULL) 
+    {
+      printf("Erro ao criar o arquivo.\n");
+      exit(1);
+    }
+
+    criptografar_descriptografar(senha_padrao);
+
+    fprintf(arquivo, "%s\n", nome_de_usuario_padrao);
+    fprintf(arquivo, "%s\n", senha_padrao);
+
+    fclose(arquivo);
+
+    printf("Credenciais padrão criadas com sucesso.\n");
+    return 1;
+  }
+  return 0;
+}
+
+
+int autenticar_usuario(char usuario[], char senha[]) 
+{
+  FILE *arquivo;
+  char nome_de_usuario_arquivo[50];
+  char senha_criptografada[50];
+
+  if (criar_senhas_padrao()) 
+  {
+    return -1; // Primeiro acesso
+  }
+
+  arquivo = fopen("senhas.dat", "r");
+  if (arquivo == NULL) 
+  {
+    printf("Erro ao abrir o arquivo.\n");
+    exit(1);
+  }
+
+  fgets(nome_de_usuario_arquivo, sizeof(nome_de_usuario_arquivo), arquivo);
+  nome_de_usuario_arquivo[strcspn(nome_de_usuario_arquivo, "\n")] = '\0';
+
+  fgets(senha_criptografada, sizeof(senha_criptografada), arquivo);
+  senha_criptografada[strcspn(senha_criptografada, "\n")] = '\0';
+
+  fclose(arquivo);
+
+  criptografar_descriptografar(senha_criptografada);
+
+  if (strcmp(usuario, nome_de_usuario_arquivo) == 0 && strcmp(senha, senha_criptografada) == 0) 
+  {
+    return 1; // Autenticação bem-sucedida
+  } 
+  else 
+  {
+    return 0; // Autenticação falhou
+  }
+}
+
+
+
+//---------------------------------------------------------------------------------------------
+
+int trocar_senha(char senha_atual[]) 
+{
+  FILE *arquivo;
+  char nome_de_usuario_arquivo[50];
+  char senha_criptografada[50];
+  char nova_senha[50];
+
+  if (criar_senhas_padrao()) 
+  {
+      return -1; // Primeiro acesso
+  }
+
+  arquivo = fopen("senhas.dat", "r");
+  if (arquivo == NULL) 
+  {
+      printf("Erro ao abrir o arquivo.\n");
+      exit(1);
+  }
+
+  fgets(nome_de_usuario_arquivo, sizeof(nome_de_usuario_arquivo), arquivo);
+  nome_de_usuario_arquivo[strcspn(nome_de_usuario_arquivo, "\n")] = '\0';
+
+  fgets(senha_criptografada, sizeof(senha_criptografada), arquivo);
+  senha_criptografada[strcspn(senha_criptografada, "\n")] = '\0';
+
+  fclose(arquivo);
+
+  criptografar_descriptografar(senha_criptografada);
+
+  if (strcmp(senha_atual, senha_criptografada) != 0) 
+  {
+      printf("Senha atual incorreta. Acesso negado.\n");
+      return 0;
+  }
+
+  printf("Digite a nova senha: ");
+  scanf("%s", nova_senha);
+
+  criptografar_descriptografar(nova_senha);
+
+  arquivo = fopen("senhas.dat", "w");
+  if (arquivo == NULL) 
+  {
+      printf("Erro ao abrir o arquivo.\n");
+      exit(1);
+  }
+
+  fprintf(arquivo, "%s\n", nome_de_usuario_arquivo);
+  fprintf(arquivo, "%s\n", nova_senha);
+  fclose(arquivo);
+
+  printf("Senha alterada com sucesso.\n");
+  return 1;
+}
+
+//---------------------------------------------------------------------------------------------
+void formatar_nome(char *nome_completo) 
+{
+  int tamanho = strlen(nome_completo);
+  int i;
+
+  // Transforma o primeiro caractere em maiúscula
+  nome_completo[0] = toupper(nome_completo[0]);
+
+  // Percorre a string para encontrar espaços e transformar a próxima letra em maiúscula
+  for (i = 1; i < tamanho; i++) 
+  {
+    // Verifica se o caractere anterior é um espaço e se o caractere atual é uma letra
+    if (nome_completo[i - 1] == ' ' && isalpha(nome_completo[i])) 
+    {
+        nome_completo[i] = toupper(nome_completo[i]);
+    }
+  }
+}
+//---------------------------------------------------------------------------------------------
+int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]) 
+{
+  int limite = indice + 1; // Considerando o índice baseado em 0
+  if ((int)strlen(entrada_do_usuario) > limite) 
+  {
+    printf("Você excedeu o limite de caracteres.\n");
+    return 0; // Retorna 0 se exceder o limite
+  }
+  return 1; // Retorna 1 se for válido
+}
+//---------------------------------------------------------------------------------------------
+int validar_data(char *data) 
+{
+  int dia, mes, ano;
+  char barra1, barra2;
+  // Verifica se a entrada tem o formato esperado
+  if (sscanf(data, "%d %c %d %c %d", &dia, &barra1, &mes, &barra2, &ano) != 5)
+  {
+    return 0;
+  }
+  // Verifica se as barras estão no lugar correto e se os valores são válidos
+  if (barra1 != '/' || barra2 != '/' || dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1900 || ano > 2100) 
+  {
+    return 0;
+  }
+  return 1;
+}
+//---------------------------------------------------------------------------------------------
 char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento) 
 {
   int opcao;
@@ -491,7 +549,6 @@ char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento)
       getchar();
       if (opcao < 1 || opcao > 3) 
       {
-        gotoxy(6, 18);
         printf("\n\t\t\t### Opção Inválida. Por favor digite uma opcão entre 1 e 3");
       }
     }
@@ -525,7 +582,8 @@ void alterar_preco_do_ingresso()
   
 }
 //---------------------------------------------------------------------------------------------
-void adicionar_acervo(){
+void adicionar_acervo()
+{
   FILE * fp;
   obras dados_obras;
   char cadastrar_obras;
@@ -588,15 +646,15 @@ void excluir_acervo()
 
   if ((fp = fopen("obras.csv", "r")) == NULL) 
   {
-      printf("\n\t### Erro na abertura do arquivo!\n\n");
-      return;
+    printf("\n\t### Erro na abertura do arquivo!\n\n");
+    return;
   }
 
   if ((temp = fopen("temp.csv", "w")) == NULL) 
   {
-      printf("\n\t### Erro na abertura do arquivo temporário!\n\n");
-      fclose(fp);
-      return;
+    printf("\n\t### Erro na abertura do arquivo temporário!\n\n");
+    fclose(fp);
+    return;
   }
   // Ignorar a primeira linha, que é o cabeçalho
   fgets(linha, sizeof(linha), fp);
@@ -608,7 +666,7 @@ void excluir_acervo()
 
     // Ler os dados do arquivo
     sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%[^\n]",
-           &nome, &fabricante, &data_de_fabricacao, &conservacao, &importancia_historica);
+           nome, fabricante, data_de_fabricacao, conservacao, importancia_historica);
 
     // Comparar o nome lido com o nome a ser excluído
     if (strcmp(nome, nome_excluir) == 0) 
@@ -624,14 +682,16 @@ void excluir_acervo()
   fclose(temp);
   if (!linha_encontrada) 
   {
-      printf("Obra com o nome '%s' não encontrada.\n", nome_excluir);
-      remove("temp.csv"); // Remover o arquivo temporário, já que não houve alterações
+    printf("Obra com o nome '%s' não encontrada.\n", nome_excluir);
+    getch();
+    remove("temp.csv"); // Remover o arquivo temporário, já que não houve alterações
   } 
   else 
   {
-      remove("obras.csv"); // Remover o arquivo original
-      rename("temp.csv", "obras.csv"); // Renomear o arquivo temporário para substituir o original
-      printf("Obra com o nome '%s' foi excluída com sucesso.\n", nome_excluir);
+    remove("obras.csv"); // Remover o arquivo original
+    rename("temp.csv", "obras.csv"); // Renomear o arquivo temporário para substituir o original
+    printf("Obra com o nome '%s' foi excluída com sucesso.\n", nome_excluir);
+    getch();
   }
 }
 //---------------------------------------------------------------------------------------------
@@ -643,8 +703,8 @@ void listar_acervo()
 
   if ((fp = fopen("obras.csv", "r")) == NULL) 
   {
-      printf("\n\t### Erro na abertura do arquivo!\n\n");
-      return;
+    printf("\n\t### Erro na abertura do arquivo!\n\n");
+    return;
   }
   printf("\n\n\t\t\t\t\t  ### ** Lista de Acervos ** ###\n");
 
@@ -656,7 +716,7 @@ void listar_acervo()
 
     // Ler os dados do arquivo
     sscanf(linha, "%[^,],%[^,],%[^,],%[^,],%[^\n]",
-          &nome, &fabricante, &data_de_fabricacao, &conservacao, &importancia_historica);
+           nome, fabricante, data_de_fabricacao, conservacao, importancia_historica);
     
     printf("\n-------------------------------------------------------------------------------------------------");
     printf("\n### Nome:\n   • %s\n", nome);
@@ -671,12 +731,6 @@ void listar_acervo()
 
   if (linhas_lidas == 0) 
   {
-      printf("\n\n\n\n\n\n\n\t\t\t### Nenhuma obra encontrada. ###");
+    printf("\n\n\n\n\n\n\n\t\t\t### Nenhuma obra encontrada. ###");
   }
 }
-
-
-
-
-  
-
