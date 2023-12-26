@@ -382,6 +382,7 @@ int criar_senhas_padrao()
            "\n\t### O nome de usuário não poderá ser alterado posteriormente!");
     printf("\n\n\n\t### Defina o novo nome de usuário: ");
     scanf("%s", nome_de_usuario_padrao);
+    printf("\t### Defina a nova senha: ");
     ocultar_senha_entrada(senha_padrao, sizeof(senha_padrao));
     fflush(stdin);
 
