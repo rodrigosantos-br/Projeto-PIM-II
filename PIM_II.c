@@ -332,30 +332,33 @@ void imprimir_data_hora_atual()
 //---------------------------------------------------------------------------------------------
 void ocultar_senha_entrada(char *senha, int comprimento_maximo) 
 {
-    int i = 0;
+  int i = 0;
 
-    while (1) {
-        senha[i] = getch();
-        if (senha[i] == '\r' || senha[i] == '\n') 
-        {
-          senha[i] = '\0';
-          break;
-        } else if (senha[i] == 8 && i > 0) { // Backspace
-          printf("\b \b");
-          i--;
-        } 
-        else 
-        {
-          printf("*");
-          i++;
-        }
-        if (i == comprimento_maximo - 1) 
-        {
-          senha[i] = '\0';
-          break;
-        }
+  while (1) 
+  {
+    senha[i] = getch();
+    if (senha[i] == '\r' || senha[i] == '\n') 
+    {
+      senha[i] = '\0';
+      break;
+    } 
+    else if (senha[i] == 8 && i > 0) 
+    { // Backspace
+      printf("\b \b");
+      i--;
+    } 
+    else 
+    {
+      printf("*");
+      i++;
     }
-    printf("\n");
+    if (i == comprimento_maximo - 1) 
+    {
+      senha[i] = '\0';
+      break;
+    }
+  }
+  printf("\n");
 }
 //---------------------------------------------------------------------------------------------
 void criptografar_descriptografar(char senha[]) 
@@ -457,11 +460,6 @@ int trocar_senha()
   char nome_de_usuario_arquivo[50];
   char senha_criptografada[50];
   char nova_senha[50];
-
-  if (criar_senhas_padrao()) 
-  {
-    return -1; // Primeiro acesso
-  }
 
   arquivo = fopen("senhas.dat", "r");
   if (arquivo == NULL) 
