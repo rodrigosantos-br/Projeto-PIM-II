@@ -1,7 +1,12 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<ctype.h>
-#include<conio.h>
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+#endif
 #include<string.h>
 #include<locale.h>
 #include<time.h>
@@ -44,6 +49,7 @@ void incrementar_tipo_de_ingresso_vendido();
 void relatorio_de_vendas();
 int numerar_ingresso(int ingresso);
 void imprimir_data_hora_atual();
+void ocultar_senha_entrada(char *senha, int comprimento_maximo);
 void criptografar_descriptografar(char senha[]);
 int criar_senhas_padrao();
 int autenticar_usuario();
@@ -331,6 +337,34 @@ void imprimir_data_hora_atual()
   data_hora_venda = *data_horaAtual;
 }
 //---------------------------------------------------------------------------------------------
+void ocultar_senha_entrada(char *senha, int comprimento_maximo) 
+{
+    int i = 0;
+
+    while (1) {
+        senha[i] = getch();
+        if (senha[i] == '\r' || senha[i] == '\n') 
+        {
+          senha[i] = '\0';
+          break;
+        } else if (senha[i] == 8 && i > 0) { // Backspace
+          printf("\b \b");
+          i--;
+        } 
+        else 
+        {
+          printf("*");
+          i++;
+        }
+        if (i == comprimento_maximo - 1) 
+        {
+          senha[i] = '\0';
+          break;
+        }
+    }
+    printf("\n");
+}
+//---------------------------------------------------------------------------------------------
 void criptografar_descriptografar(char senha[]) 
 {
   char chave = 'K'; // Chave de criptografia
@@ -355,8 +389,7 @@ int criar_senhas_padrao()
            "\n\t### O nome de usuário não poderá ser alterado posteriormente!");
     printf("\n\n\n\t### Defina o novo nome de usuário: ");
     scanf("%s", nome_de_usuario_padrao);
-    printf("\n\t### Defina a nova senha: ");
-    scanf("%s", senha_padrao);
+    ocultar_senha_entrada(senha_padrao, sizeof(senha_padrao));
     fflush(stdin);
 
     arquivo = fopen("senhas.dat", "wb");
@@ -400,8 +433,7 @@ int autenticar_usuario()
   printf("\n\n\t### Digite o nome de usuário: ");
   scanf("%s", usuario);
   printf("\t### Digite a senha: ");
-  scanf("%s", senha);
-  fflush(stdin);
+  ocultar_senha_entrada(senha, sizeof(senha));
 
   fgets(nome_de_usuario_arquivo, sizeof(nome_de_usuario_arquivo), arquivo);
   nome_de_usuario_arquivo[strcspn(nome_de_usuario_arquivo, "\n")] = '\0';
@@ -446,7 +478,7 @@ int trocar_senha()
   printf("\n\t### Digite o usuário atual: ");
   scanf("%s", usuario_atual);
   printf("\t### Digite a senha atual: ");
-  scanf("%s", senha_atual);
+  ocultar_senha_entrada(senha_atual, sizeof(senha_atual));
 
   fgets(nome_de_usuario_arquivo, sizeof(nome_de_usuario_arquivo), arquivo);
   nome_de_usuario_arquivo[strcspn(nome_de_usuario_arquivo, "\n")] = '\0';
@@ -465,7 +497,7 @@ int trocar_senha()
   }
 
   printf("\n\t### Digite a nova senha: ");
-  scanf("%s", nova_senha);
+  ocultar_senha_entrada(nova_senha, sizeof(nova_senha));
 
   criptografar_descriptografar(nova_senha);
 
