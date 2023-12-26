@@ -1,18 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<ctype.h>
-#ifdef _WIN32
 #include <conio.h>
-#else
-#include <termios.h>
-#include <unistd.h>
-#endif
 #include<string.h>
 #include<locale.h>
 #include<time.h>
 #include<Windows.h>
-
-#define MAX_LENGTH 250
 
 typedef struct Obras
 {
