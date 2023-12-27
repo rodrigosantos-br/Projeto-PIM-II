@@ -1,17 +1,16 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include <conio.h>
-#include<string.h>
-#include<locale.h>
-#include<time.h>
-#include<Windows.h>
+#include <string.h>
+#include <locale.h>
+#include <time.h>
 
 typedef struct Obras
 {
   char nome[50];
   char fabricante[50];
-  char data_de_fabricacao[10];
+  char data_de_fabricacao[11];
   char conservacao[30];
   char importancia_historica[1000];
 } obras;
@@ -620,6 +619,7 @@ void adicionar_acervo()
     scanf(" %[^\n]", dados_obras.nome);
     printf("\t### Fabricante: ");
     scanf(" %[^\n]", dados_obras.fabricante);
+
     while(!validar_data(dados_obras.data_de_fabricacao))
     {
       printf("\t### Data de fabricação (dd/mm/aaaa): ");
@@ -645,8 +645,8 @@ void adicionar_acervo()
     {
       fprintf(fp, "Nome, Fabricante, Data de Fabricação, Conservação, Importância Histórica\n");
     }
-    fprintf(fp, "%s, %s,%s, %s,%s\n", dados_obras.nome, dados_obras.fabricante, dados_obras.data_de_fabricacao,
-                                      dados_obras.conservacao, dados_obras.importancia_historica);                                          
+    fprintf(fp, "%s, %s, %s, %s, %s\n", dados_obras.nome, dados_obras.fabricante, dados_obras.data_de_fabricacao,
+                                        dados_obras.conservacao, dados_obras.importancia_historica);                                          
     fclose(fp);
     do
     {
