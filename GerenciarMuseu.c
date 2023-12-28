@@ -36,6 +36,7 @@ void menu_administrativo();
 void menu_acervo();
 void exibir_logotipo();
 void efetuar_nova_venda();
+void excluir_venda();
 void listar_vendas();
 void incrementar_tipo_de_ingresso_vendido();
 void relatorio_de_vendas();
@@ -47,7 +48,7 @@ int criar_senhas_padrao();
 int autenticar_usuario();
 int trocar_senha();
 void formatar_nome(char *nome_completo);
-int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
+int validar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
 int validar_data(char *data);
 char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento);
 float calcular_valor_do_ingresso(int idade);
@@ -71,8 +72,9 @@ int main()
     exibir_logotipo();
     printf("\n\n\t### ** Menu Principal **");
     printf("\n\n\t### 1. Nova Venda");
-    printf("\n\t### 2. Listar Vendas");
-    printf("\n\t### 3. Administração");
+    printf("\n\t### 2. Exlcuir Venda");
+    printf("\n\t### 3. Listar Vendas");
+    printf("\n\t### 4. Administração");
     printf("\n\t### 0. Sair\n\n\n");
     printf("\t### Digite a opção: ");
     scanf("%c", &opcao);
@@ -89,10 +91,23 @@ int main()
       case '2':
         system("cls");
         exibir_logotipo();
+        if(autenticar_usuario() == 1)
+        {
+          excluir_venda();
+        }
+        else if(autenticar_usuario() == 0)
+        {
+          printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
+          getch();
+        }        
+        break;
+      case '3':
+        system("cls");
+        exibir_logotipo();
         listar_vendas();
         getch();
         break;
-      case '3':
+      case '4':
         system("cls");
         exibir_logotipo();
         if (autenticar_usuario() == 1) 
@@ -112,7 +127,7 @@ int main()
         exit(1);
         break;
       default:
-        printf("\n\t### Opção Inválida! Por favor digite uma opção ente 0 a 3.");
+        printf("\n\t### Opção Inválida! Por favor digite uma opção ente 0 a 4.");
         getch();
     }
   }while(opcao != '0');
@@ -262,6 +277,29 @@ void efetuar_nova_venda()
   vendas[quantidade_total_de_ingressos].ingresso = quantidade_total_de_ingressos;
   vendas[quantidade_total_de_ingressos].preco = 
   calcular_valor_do_ingresso(vendas[quantidade_total_de_ingressos].idade);
+}
+//---------------------------------------------------------------------------------------------
+void excluir_venda() {
+    int numero_do_ingresso;
+
+    printf("\n\t### Digite o número do ingresso a ser excluído: ");
+    scanf("%d", &numero_do_ingresso);
+    getchar();
+
+    // Ajuste o número do ingresso para corresponder ao índice da array (subtraindo 1)
+    int indice_ingresso = numero_do_ingresso - 1;
+
+    if (indice_ingresso >= 0 && indice_ingresso < quantidade_total_de_ingressos) {
+        for (int j = indice_ingresso; j < quantidade_total_de_ingressos - 1; j++) {
+            vendas[j] = vendas[j + 1];
+        }
+        quantidade_total_de_ingressos--;
+        printf("\n\t### Venda do Ingresso %d excluída com sucesso!", numero_do_ingresso);
+        getch();
+    } else {
+        printf("\n\t### Ingresso não encontrado, nenhuma venda excluída.\n");
+        getch();
+    }
 }
 //---------------------------------------------------------------------------------------------
 void listar_vendas()
@@ -428,6 +466,7 @@ int autenticar_usuario()
   exibir_logotipo();
   printf("\n\n\t### Digite o nome de usuário: ");
   scanf("%s", usuario);
+  fflush(stdin);
   printf("\t### Digite a senha: ");
   ocultar_senha_entrada(senha, sizeof(senha));
 
@@ -525,7 +564,7 @@ void formatar_nome(char *nome_completo)
   }
 }
 //---------------------------------------------------------------------------------------------
-int valiadar_entrada_de_caracteres(int indice, char entrada_do_usuario[]) 
+int validar_entrada_de_caracteres(int indice, char entrada_do_usuario[]) 
 {
   int limite = indice + 1; // Considerando o índice baseado em 0
   if ((int)strlen(entrada_do_usuario) > limite) 
