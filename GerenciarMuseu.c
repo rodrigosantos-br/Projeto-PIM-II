@@ -40,7 +40,7 @@ void excluir_venda();
 void listar_vendas();
 void incrementar_tipo_de_ingresso_vendido();
 void relatorio_de_vendas();
-int numerar_ingresso(int ingresso);
+int numerar_ingresso();
 void imprimir_data_hora_atual();
 void ocultar_senha_entrada(char *senha, int comprimento_maximo);
 void criptografar_descriptografar(char senha[]);
@@ -261,7 +261,7 @@ void efetuar_nova_venda()
 {
   printf("\n\n\t\t\t\t### ** Nova Venda ** ###");
   printf("\n\n\t\t\t--------------- Ingresso %d ---------------\n\n", 
-          numerar_ingresso(vendas[quantidade_total_de_ingressos].ingresso));
+          vendas[quantidade_total_de_ingressos].ingresso = numerar_ingresso());
   imprimir_data_hora_atual();
   printf("\n\t\t\t### Digite o nome: ");
   scanf("\t %[^\n]", vendas[quantidade_total_de_ingressos].nome);
@@ -274,7 +274,6 @@ void efetuar_nova_venda()
   verificar_forma_de_pagamento(vendas[quantidade_total_de_ingressos].idade, 
                                vendas[quantidade_total_de_ingressos].forma_de_pagamento);
 
-  vendas[quantidade_total_de_ingressos].ingresso = quantidade_total_de_ingressos;
   vendas[quantidade_total_de_ingressos].preco = 
   calcular_valor_do_ingresso(vendas[quantidade_total_de_ingressos].idade);
 }
@@ -310,7 +309,7 @@ void listar_vendas()
   {
     printf("\t\t\t--------------------------------------------------------------------\n");
     printf("\t\t\t| ########################  Ingresso - %d  ######################## |\n", 
-            (vendas[i].ingresso + 1));
+            (vendas[i].ingresso));
     printf("\t\t\t|------------------------------------------------------------------|\n");
     data_hora_venda = vendas[i].data_hora;
     printf("\t\t\t| Data: %02d/%02d/%02d   \t    Horário: %02d:%02d\t\t\t   |\n",
@@ -345,10 +344,10 @@ void relatorio_de_vendas()
   getch();
 }
 //---------------------------------------------------------------------------------------------
-int numerar_ingresso(int ingresso) 
+int numerar_ingresso() 
 {
-  ingresso = quantidade_total_de_ingressos +1;
-  return ingresso;
+  static int numero_sequencial = 1;
+  return numero_sequencial++;
 }
 //---------------------------------------------------------------------------------------------
 void imprimir_data_hora_atual() 
