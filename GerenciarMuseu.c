@@ -5,6 +5,7 @@
 #include <string.h>
 #include <locale.h>
 #include <time.h>
+#include <stdbool.h>
 
 typedef struct Obras
 {
@@ -23,7 +24,9 @@ struct Vendas
   float preco;
   char forma_de_pagamento[30];
   struct tm data_hora;
-} vendas[1000];
+  char tipo_de_ingresso[15];
+  bool vendido;
+} venda[1000];
 
 struct tm data_hora_venda;
 
@@ -37,9 +40,9 @@ void menu_acervo();
 void exibir_logotipo();
 void efetuar_nova_venda();
 void excluir_venda();
-void listar_vendas();
+void listar_venda();
 void incrementar_tipo_de_ingresso_vendido();
-void relatorio_de_vendas();
+void relatorio_de_venda();
 int numerar_ingresso();
 void imprimir_data_hora_atual();
 void ocultar_senha_entrada(char *senha, int comprimento_maximo);
@@ -51,7 +54,8 @@ void formatar_nome(char *nome_completo);
 int validar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
 int validar_data(char *data);
 char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento);
-float calcular_valor_do_ingresso(int idade);
+void verificar_tipo_de_ingresso(int idade);
+void calcular_valor_do_ingresso(char *tipo_de_ingresso);
 void alterar_preco_do_ingresso();
 void adicionar_acervo();
 void excluir_acervo();
@@ -73,7 +77,7 @@ int main()
     printf("\n\n\t### ** Menu Principal **");
     printf("\n\n\t### 1. Nova Venda");
     printf("\n\t### 2. Exlcuir Venda");
-    printf("\n\t### 3. Listar Vendas");
+    printf("\n\t### 3. Listar venda");
     printf("\n\t### 4. Administração");
     printf("\n\t### 0. Sair\n\n\n");
     printf("\t### Digite a opção: ");
@@ -91,11 +95,11 @@ int main()
       case '2':
         system("cls");
         exibir_logotipo();
-        if(autenticar_usuario() == 1)
+        if(autenticar_usuario())
         {
           excluir_venda();
         }
-        else if(autenticar_usuario() == 0)
+        else if(!autenticar_usuario())
         {
           printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
           getch();
@@ -104,17 +108,17 @@ int main()
       case '3':
         system("cls");
         exibir_logotipo();
-        listar_vendas();
+        listar_venda();
         getch();
         break;
       case '4':
         system("cls");
         exibir_logotipo();
-        if (autenticar_usuario() == 1) 
+        if (autenticar_usuario()) 
         {
         menu_administrativo();
         } 
-        else if (autenticar_usuario() == 0) 
+        else if (!autenticar_usuario()) 
         {
         printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
         getch();
@@ -142,7 +146,7 @@ void menu_administrativo()
     system("cls");
     exibir_logotipo();
     printf("\n\t### ** Administração **\n\n");
-    printf("\t### 1. Relatório de vendas\n");
+    printf("\t### 1. Relatório de venda\n");
     printf("\t### 2. Alterar preço do ingresso\n");
     printf("\t### 3. Lista de clientes\n");
     printf("\t### 4. Controle de acervo\n");
@@ -157,7 +161,7 @@ void menu_administrativo()
       case '1':
         system("cls");
         exibir_logotipo();
-        relatorio_de_vendas();
+        relatorio_de_venda();
         break;
       case '2':
         system("cls");
@@ -261,85 +265,93 @@ void efetuar_nova_venda()
 {
   printf("\n\n\t\t\t\t### ** Nova Venda ** ###");
   printf("\n\n\t\t\t--------------- Ingresso %d ---------------\n\n", 
-          vendas[quantidade_total_de_ingressos].ingresso = numerar_ingresso());
+          venda[quantidade_total_de_ingressos].ingresso = numerar_ingresso());
   imprimir_data_hora_atual();
   printf("\n\t\t\t### Digite o nome: ");
-  scanf("\t %[^\n]", vendas[quantidade_total_de_ingressos].nome);
-  formatar_nome(vendas[quantidade_total_de_ingressos].nome);
+  scanf("\t %[^\n]", venda[quantidade_total_de_ingressos].nome);
+  formatar_nome(venda[quantidade_total_de_ingressos].nome);
   fflush(stdin);         
   printf("\t\t\t### Digite a idade: ");
-  scanf("%d", &vendas[quantidade_total_de_ingressos].idade);        
+  scanf("%d", &venda[quantidade_total_de_ingressos].idade);        
   getchar();
+
+  verificar_forma_de_pagamento(venda[quantidade_total_de_ingressos].idade, 
+                               venda[quantidade_total_de_ingressos].forma_de_pagamento);
+
+  verificar_tipo_de_ingresso(venda[quantidade_total_de_ingressos].idade);
+
+  calcular_valor_do_ingresso(venda[quantidade_total_de_ingressos].tipo_de_ingresso);
+
   
-  verificar_forma_de_pagamento(vendas[quantidade_total_de_ingressos].idade, 
-                               vendas[quantidade_total_de_ingressos].forma_de_pagamento);
-
-  vendas[quantidade_total_de_ingressos].preco = 
-  calcular_valor_do_ingresso(vendas[quantidade_total_de_ingressos].idade);
 }
 //---------------------------------------------------------------------------------------------
-void excluir_venda() {
-    int numero_do_ingresso;
-
-    printf("\n\t### Digite o número do ingresso a ser excluído: ");
-    scanf("%d", &numero_do_ingresso);
-    getchar();
-
-    // Ajuste o número do ingresso para corresponder ao índice da array (subtraindo 1)
-    int indice_ingresso = numero_do_ingresso - 1;
-
-    if (indice_ingresso >= 0 && indice_ingresso < quantidade_total_de_ingressos) {
-        for (int j = indice_ingresso; j < quantidade_total_de_ingressos - 1; j++) {
-            vendas[j] = vendas[j + 1];
-        }
-        quantidade_total_de_ingressos--;
-        printf("\n\t### Venda do Ingresso %d excluída com sucesso!", numero_do_ingresso);
-        getch();
-    } else {
-        printf("\n\t### Ingresso não encontrado, nenhuma venda excluída.\n");
-        getch();
-    }
-}
-//---------------------------------------------------------------------------------------------
-void listar_vendas()
+void excluir_venda() 
 {
-  printf("\n\t\t\t\t\t\t  ** Lista de Vendas **\n\n");
+  int numero_do_ingresso;
+
+  printf("\n\t### Digite o número do ingresso a ser excluído: ");
+  scanf("%d", &numero_do_ingresso);
+  getchar();
+
+  // Ajuste o número do ingresso para corresponder ao índice da array (subtraindo 1)
+  int indice_ingresso = numero_do_ingresso - 1;
+
+  if (indice_ingresso >= 0 && indice_ingresso < quantidade_total_de_ingressos) 
+  {
+    for (int j = indice_ingresso; j < quantidade_total_de_ingressos - 1; j++) 
+    {
+      venda[j] = venda[j + 1];
+    }
+    quantidade_total_de_ingressos--;
+    printf("\n\t### Venda do Ingresso %d excluída com sucesso!", numero_do_ingresso);
+    getch();
+  } 
+  else 
+  {
+    printf("\n\t### Ingresso não encontrado, nenhuma venda excluída.\n");
+    getch();
+  }
+}
+//---------------------------------------------------------------------------------------------
+void listar_venda()
+{
+  printf("\n\t\t\t\t\t\t  ** Lista de venda **\n\n");
   
   for(int i=0; i<quantidade_total_de_ingressos; i++)
   {
     printf("\t\t\t--------------------------------------------------------------------\n");
     printf("\t\t\t| ########################  Ingresso - %d  ######################## |\n", 
-            (vendas[i].ingresso));
+            (venda[i].ingresso));
     printf("\t\t\t|------------------------------------------------------------------|\n");
-    data_hora_venda = vendas[i].data_hora;
+    data_hora_venda = venda[i].data_hora;
     printf("\t\t\t| Data: %02d/%02d/%02d   \t    Horário: %02d:%02d\t\t\t   |\n",
             data_hora_venda.tm_mday, data_hora_venda.tm_mon + 1, data_hora_venda.tm_year + 1900,
             data_hora_venda.tm_hour, data_hora_venda.tm_min);          
-    printf("\t\t\t| Nome:.................... %-39s|\n", vendas[i].nome);
-    printf("\t\t\t| Idade:................... %d anos \t\t\t\t   |\n", vendas[i].idade);
-    printf("\t\t\t| Preço:................... R$%.2f \t\t\t\t   |\n", vendas[i].preco);
-    printf("\t\t\t| Tipo Pagamento:.......... %s \t\t\t\t   |\n", vendas[i].forma_de_pagamento);
+    printf("\t\t\t| Nome:.................... %-39s|\n", venda[i].nome);
+    printf("\t\t\t| Idade:................... %d anos \t\t\t\t   |\n", venda[i].idade);
+    printf("\t\t\t| Preço:................... R$%.2f \t\t\t\t   |\n", venda[i].preco);
+    printf("\t\t\t| Tipo Pagamento:.......... %s \t\t\t\t   |\n", venda[i].forma_de_pagamento);
     printf("\t\t\t|------------------------------------------------------------------|\n\n");
   }
 }
 //---------------------------------------------------------------------------------------------
 void incrementar_tipo_de_ingresso_vendido()
 {
-  ingresso_inteiro += (vendas[quantidade_total_de_ingressos].idade >= 16 && 
-                       vendas[quantidade_total_de_ingressos].idade < 60);
-  ingresso_meia += (vendas[quantidade_total_de_ingressos].idade < 16);
-  ingresso_isento += (vendas[quantidade_total_de_ingressos].idade >= 60);
+  ingresso_inteiro += (venda[quantidade_total_de_ingressos].idade >= 16 && 
+                       venda[quantidade_total_de_ingressos].idade < 60);
+  ingresso_meia += (venda[quantidade_total_de_ingressos].idade < 16);
+  ingresso_isento += (venda[quantidade_total_de_ingressos].idade >= 60);
   quantidade_total_de_ingressos++;
 }
 //---------------------------------------------------------------------------------------------
-void relatorio_de_vendas()
+void relatorio_de_venda()
 {
   printf("\n\n\t\t### Ingressos inteiro: %d\t-\tValor ingressos inteiro: R$%.2f\n", 
           ingresso_inteiro, ingresso_inteiro*20.00);
   printf("\t\t### Ingressos meia: %d\t\t-\tValor ingressos meia: R$%.2f\n", 
           ingresso_meia, ingresso_meia*10.00);
   printf("\t\t### Ingressos isento: %d\n", ingresso_isento);
-  printf("\n\n\t\t### Total de vendas: %d ingressos.\t-\tValor total: R$%.2f", 
+  printf("\n\n\t\t### Total de venda: %d ingressos.\t-\tValor total: R$%.2f", 
           quantidade_total_de_ingressos, (ingresso_inteiro*20.00+ingresso_meia*10.00));
   getch();
 }
@@ -362,7 +374,7 @@ void imprimir_data_hora_atual()
   printf("\t\t\t### Data: %02d/%02d/%02d  \t  Horário: %02d:%02d ###",
           data_horaAtual->tm_mday, data_horaAtual->tm_mon + 1, data_horaAtual->tm_year + 1900,
           data_horaAtual->tm_hour, data_horaAtual->tm_min);
-  vendas[quantidade_total_de_ingressos].data_hora = *data_horaAtual;
+  venda[quantidade_total_de_ingressos].data_hora = *data_horaAtual;
   data_hora_venda = *data_horaAtual;
 }
 //---------------------------------------------------------------------------------------------
@@ -442,9 +454,9 @@ int criar_senhas_padrao()
 
     printf("\n\t### Credenciais padrão criadas com sucesso.\n");
     getch();
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 //---------------------------------------------------------------------------------------------
 int autenticar_usuario() 
@@ -481,11 +493,11 @@ int autenticar_usuario()
 
   if (strcmp(usuario, nome_de_usuario_arquivo) == 0 && strcmp(senha, senha_criptografada) == 0) 
   {
-    return 1; // Autenticação bem-sucedida
+    return true; // Autenticação bem-sucedida
   } 
   else 
   {
-    return 0; // Autenticação falhou
+    return false; // Autenticação falhou
   }
 }
 //---------------------------------------------------------------------------------------------
@@ -522,7 +534,7 @@ int trocar_senha()
   if (strcmp(senha_atual, senha_criptografada) != 0) 
   {
     printf("\n\t### Senha atual incorreta.\n\t### Acesso negado.\n");
-    return 0;
+    return false;
   }
 
   printf("\n\t### Digite a nova senha: ");
@@ -541,7 +553,7 @@ int trocar_senha()
   fprintf(arquivo, "%s\n", nova_senha);
   fclose(arquivo);
 
-  return 1;
+  return true;
 }
 //---------------------------------------------------------------------------------------------
 void formatar_nome(char *nome_completo) 
@@ -558,7 +570,7 @@ void formatar_nome(char *nome_completo)
     // Verifica se o caractere anterior é um espaço e se o caractere atual é uma letra
     if (nome_completo[i - 1] == ' ' && isalpha(nome_completo[i])) 
     {
-        nome_completo[i] = toupper(nome_completo[i]);
+      nome_completo[i] = toupper(nome_completo[i]);
     }
   }
 }
@@ -569,9 +581,9 @@ int validar_entrada_de_caracteres(int indice, char entrada_do_usuario[])
   if ((int)strlen(entrada_do_usuario) > limite) 
   {
     printf("Você excedeu o limite de caracteres.\n");
-    return 0; // Retorna 0 se exceder o limite
+    return false; // Retorna falso se exceder o limite
   }
-  return 1; // Retorna 1 se for válido
+  return true; // Retorna verdadeiro se for válido
 }
 //---------------------------------------------------------------------------------------------
 int validar_data(char *data) 
@@ -581,14 +593,14 @@ int validar_data(char *data)
   // Verifica se a entrada tem o formato esperado
   if (sscanf(data, "%d %c %d %c %d", &dia, &barra1, &mes, &barra2, &ano) != 5)
   {
-    return 0;
+    return false;
   }
   // Verifica se as barras estão no lugar correto e se os valores são válidos
   if (barra1 != '/' || barra2 != '/' || dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1900 || ano > 2100) 
   {
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 //---------------------------------------------------------------------------------------------
 char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento) 
@@ -629,12 +641,36 @@ char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento)
   return *forma_de_pagamento;
 }
 //---------------------------------------------------------------------------------------------
-float calcular_valor_do_ingresso(int idade) 
+void verificar_tipo_de_ingresso(int idade)
+{
+  if(idade <= 16)
+  {
+    strcpy(venda[quantidade_total_de_ingressos].tipo_de_ingresso, "Meia");
+  }
+  else if(idade >= 60 && idade <= 110)
+  {
+    strcpy(venda[quantidade_total_de_ingressos].tipo_de_ingresso, "Isento");
+  }
+  else
+  {
+    strcpy(venda[quantidade_total_de_ingressos].tipo_de_ingresso, "Inteiro");
+  }
+}
+//---------------------------------------------------------------------------------------------
+void calcular_valor_do_ingresso(char *tipo_de_ingresso) 
 { 
-  float meia = 10.00;
-  float inteiro = 20.00;
-  float isento = 0.00;
-  return (idade > 0 && idade <= 16) ? meia : (idade >= 60 && idade <=110) ? isento : inteiro;
+  if (strcmp(tipo_de_ingresso, "Inteiro") == 0)
+  {
+    venda[quantidade_total_de_ingressos].preco = 20.00;
+  }
+  else if (strcmp(tipo_de_ingresso, "Meia") == 0)
+  {
+    venda[quantidade_total_de_ingressos].preco = 10.00;
+  }
+  else if(strcmp(tipo_de_ingresso, "Isento") == 0)
+  {
+    venda[quantidade_total_de_ingressos].preco = 0.00;
+  }
 }
 //---------------------------------------------------------------------------------------------
 void alterar_preco_do_ingresso()
@@ -708,7 +744,7 @@ void excluir_acervo()
   if ((fp = fopen("obras.csv", "r")) == NULL) 
   {
     printf("\n\t### Erro na abertura do arquivo!\n\n");
-    return;
+    getch();
   }
 
   if ((temp = fopen("temp.csv", "w")) == NULL) 
@@ -765,7 +801,7 @@ void listar_acervo()
   if ((fp = fopen("obras.csv", "r")) == NULL) 
   {
     printf("\n\t### Erro na abertura do arquivo!\n\n");
-    return;
+    getch();
   }
   printf("\n\n\t\t\t\t\t  ### ** Lista de Acervos ** ###\n");
 
