@@ -25,16 +25,18 @@ struct Vendas
   char forma_de_pagamento[30];
   struct tm data_hora;
   char tipo_de_ingresso[15];
-  bool vendido;
+  bool vendido; // Para marcar se o ingresso foi vendido ou não.
 } venda[1000];
 
 struct tm data_hora_venda;
 
+float preco_do_ingresso_atual = 20.00;
 int quantidade_total_de_obras=0;
 int quantidade_total_de_ingressos=0;
 int ingresso_inteiro = 0, ingresso_meia = 0, ingresso_isento = 0;
 
 // ### Protótipos das Funções ###
+int main();
 void menu_administrativo();
 void menu_acervo();
 void exibir_logotipo();
@@ -55,8 +57,8 @@ int validar_entrada_de_caracteres(int indice, char entrada_do_usuario[]);
 int validar_data(char *data);
 char verificar_forma_de_pagamento(int idade, char *forma_de_pagamento);
 void verificar_tipo_de_ingresso(int idade);
-void calcular_valor_do_ingresso(char *tipo_de_ingresso);
-void alterar_preco_do_ingresso();
+void calcular_preco_do_ingresso(char *tipo_de_ingresso);
+void alterar_preco_do_ingresso(float novo_preco);
 void adicionar_acervo();
 void excluir_acervo();
 void listar_acervo();
@@ -140,6 +142,7 @@ int main()
 //---------------------------------------------------------------------------------------------
 void menu_administrativo() 
 {
+  float novo_preco;
   char opcao;
   do 
   {    
@@ -165,7 +168,10 @@ void menu_administrativo()
         break;
       case '2':
         system("cls");
-        alterar_preco_do_ingresso();
+        exibir_logotipo();
+        printf("\n\t### Digite o novo preço: ");
+        scanf("%f", &novo_preco);
+        alterar_preco_do_ingresso(novo_preco);
         getch();
         break;
       case '3':
@@ -280,8 +286,7 @@ void efetuar_nova_venda()
 
   verificar_tipo_de_ingresso(venda[quantidade_total_de_ingressos].idade);
 
-  calcular_valor_do_ingresso(venda[quantidade_total_de_ingressos].tipo_de_ingresso);
-
+  calcular_preco_do_ingresso(venda[quantidade_total_de_ingressos].tipo_de_ingresso);
   
 }
 //---------------------------------------------------------------------------------------------
@@ -293,14 +298,24 @@ void excluir_venda()
   scanf("%d", &numero_do_ingresso);
   getchar();
 
-  // Ajuste o número do ingresso para corresponder ao índice da array (subtraindo 1)
-  int indice_ingresso = numero_do_ingresso - 1;
+  int indice_ingresso = -1; // Inicializando o índice como -1 para indicar que o ingresso não foi encontrado
 
-  if (indice_ingresso >= 0 && indice_ingresso < quantidade_total_de_ingressos) 
+  // Procurar o índice do ingresso com o número fornecido
+  for (int i = 0; i < quantidade_total_de_ingressos; i++) 
   {
+    if (venda[i].ingresso == numero_do_ingresso) 
+    {
+      indice_ingresso = i;
+      break; // Encontrou o ingresso, então pare a busca
+    }
+  }
+
+  if (indice_ingresso != -1) 
+  {
+    // Remover a venda movendo todas as vendas posteriores uma posição para trás na matriz
     for (int j = indice_ingresso; j < quantidade_total_de_ingressos - 1; j++) 
     {
-      venda[j] = venda[j + 1];
+        venda[j] = venda[j + 1];
     }
     quantidade_total_de_ingressos--;
     printf("\n\t### Venda do Ingresso %d excluída com sucesso!", numero_do_ingresso);
@@ -657,15 +672,18 @@ void verificar_tipo_de_ingresso(int idade)
   }
 }
 //---------------------------------------------------------------------------------------------
-void calcular_valor_do_ingresso(char *tipo_de_ingresso) 
+void calcular_preco_do_ingresso(char *tipo_de_ingresso) 
 { 
+  float preco_do_ingresso;
+  preco_do_ingresso = preco_do_ingresso_atual;
+
   if (strcmp(tipo_de_ingresso, "Inteiro") == 0)
   {
-    venda[quantidade_total_de_ingressos].preco = 20.00;
+    venda[quantidade_total_de_ingressos].preco = preco_do_ingresso;
   }
   else if (strcmp(tipo_de_ingresso, "Meia") == 0)
   {
-    venda[quantidade_total_de_ingressos].preco = 10.00;
+    venda[quantidade_total_de_ingressos].preco = preco_do_ingresso / 2;
   }
   else if(strcmp(tipo_de_ingresso, "Isento") == 0)
   {
@@ -673,9 +691,10 @@ void calcular_valor_do_ingresso(char *tipo_de_ingresso)
   }
 }
 //---------------------------------------------------------------------------------------------
-void alterar_preco_do_ingresso()
+void alterar_preco_do_ingresso(float novo_preco) 
 {
-  
+  preco_do_ingresso_atual = novo_preco;
+  printf("\n\t### Preço do ingresso alterado para: %.2f\n", novo_preco);
 }
 //---------------------------------------------------------------------------------------------
 void adicionar_acervo()
