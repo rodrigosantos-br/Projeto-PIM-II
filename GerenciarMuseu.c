@@ -298,26 +298,39 @@ void excluir_venda()
   scanf("%d", &numero_do_ingresso);
   getchar();
 
-  int indice_ingresso = -1; // Inicializando o índice como -1 para indicar que o ingresso não foi encontrado
+  int indice_ingresso = -1;
 
-  // Procurar o índice do ingresso com o número fornecido
   for (int i = 0; i < quantidade_total_de_ingressos; i++) 
   {
     if (venda[i].ingresso == numero_do_ingresso) 
     {
       indice_ingresso = i;
-      break; // Encontrou o ingresso, então pare a busca
+      break;
     }
   }
 
   if (indice_ingresso != -1) 
   {
-    // Remover a venda movendo todas as vendas posteriores uma posição para trás na matriz
-    for (int j = indice_ingresso; j < quantidade_total_de_ingressos - 1; j++) 
+    // Decrementar o tipo de ingresso correspondente
+    if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Inteiro") == 0) 
     {
-        venda[j] = venda[j + 1];
+      ingresso_inteiro--;
+    } 
+    else if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Meia") == 0) 
+    {
+      ingresso_meia--;
+    } 
+    else if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Isento") == 0) 
+    {
+      ingresso_isento--;
     }
+
+    // Sobrescrever os dados do ingresso a ser excluído com os dados do último ingresso
+    venda[indice_ingresso] = venda[quantidade_total_de_ingressos - 1];
+
+    // Decrementar o contador de vendas
     quantidade_total_de_ingressos--;
+
     printf("\n\t### Venda do Ingresso %d excluída com sucesso!", numero_do_ingresso);
     getch();
   } 
@@ -694,7 +707,7 @@ void calcular_preco_do_ingresso(char *tipo_de_ingresso)
 void alterar_preco_do_ingresso(float novo_preco) 
 {
   preco_do_ingresso_atual = novo_preco;
-  printf("\n\t### Preço do ingresso alterado para: %.2f\n", novo_preco);
+  printf("\n\t### Preço do ingresso alterado para R$%.2f\n", novo_preco);
 }
 //---------------------------------------------------------------------------------------------
 void adicionar_acervo()
