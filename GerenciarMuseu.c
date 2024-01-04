@@ -42,6 +42,7 @@ void menu_acervo();
 void exibir_logotipo();
 void efetuar_nova_venda();
 void excluir_venda();
+void decrementar_tipo_de_ingresso_excluido(int indice_ingresso);
 void listar_venda();
 void incrementar_tipo_de_ingresso_vendido();
 void relatorio_de_venda();
@@ -101,7 +102,7 @@ int main()
         {
           excluir_venda();
         }
-        else if(!autenticar_usuario())
+        else
         {
           printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
           getch();
@@ -120,7 +121,7 @@ int main()
         {
         menu_administrativo();
         } 
-        else if (!autenticar_usuario()) 
+        else
         {
         printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
         getch();
@@ -128,7 +129,7 @@ int main()
         break;
       case '0':
         system("cls");
-        printf("\n\n\t\t\t### Encerrando......\n");
+        printf("\n\n\t\t\t ### Encerrando......\n");
         getch();
         exit(1);
         break;
@@ -311,20 +312,7 @@ void excluir_venda()
 
   if (indice_ingresso != -1) 
   {
-    // Decrementar o tipo de ingresso correspondente
-    if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Inteiro") == 0) 
-    {
-      ingresso_inteiro--;
-    } 
-    else if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Meia") == 0) 
-    {
-      ingresso_meia--;
-    } 
-    else if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Isento") == 0) 
-    {
-      ingresso_isento--;
-    }
-
+    decrementar_tipo_de_ingresso_excluido(indice_ingresso);
     // Sobrescrever os dados do ingresso a ser excluído com os dados do último ingresso
     venda[indice_ingresso] = venda[quantidade_total_de_ingressos - 1];
 
@@ -338,6 +326,23 @@ void excluir_venda()
   {
     printf("\n\t### Ingresso não encontrado, nenhuma venda excluída.\n");
     getch();
+  }
+}
+//---------------------------------------------------------------------------------------------
+void decrementar_tipo_de_ingresso_excluido(int indice_ingresso)
+{
+  // Decrementar o tipo de ingresso correspondente
+  if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Inteiro") == 0) 
+  {
+    ingresso_inteiro--;
+  } 
+  else if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Meia") == 0) 
+  {
+    ingresso_meia--;
+  } 
+  else if (strcmp(venda[indice_ingresso].tipo_de_ingresso, "Isento") == 0) 
+  {
+    ingresso_isento--;
   }
 }
 //---------------------------------------------------------------------------------------------
