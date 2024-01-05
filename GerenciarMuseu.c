@@ -119,12 +119,12 @@ int main()
         exibir_logotipo();
         if (autenticar_usuario()) 
         {
-        menu_administrativo();
+          menu_administrativo();
         } 
         else
         {
-        printf("\n\t### Credenciais incorretas. Tente novamente.\n");
-        getch();
+          printf("\n\t### Credenciais incorretas. Tente novamente.\n");
+          getch();
         }
         break;
       case '0':
@@ -190,13 +190,13 @@ void menu_administrativo()
         exibir_logotipo();
         if (trocar_senha()) 
         {
-        printf("\n\t### Senha alterada com sucesso.\n");
-        getch();
+          printf("\n\t### Senha alterada com sucesso.\n");
+          getch();
         } 
         else 
         {
-        printf("\t### Falha ao trocar a senha.\n");
-        getch();
+          printf("\t### Falha ao trocar a senha.\n");
+          getch();
         }
         fflush(stdin);
         break;
@@ -416,7 +416,7 @@ void ocultar_senha_entrada(char *senha, int comprimento_maximo)
 {
   int i = 0;
 
-  while (1) 
+  while (true) 
   {
     senha[i] = getch();
     if (senha[i] == '\r' || senha[i] == '\n') 
@@ -454,7 +454,6 @@ void criptografar_descriptografar(char senha[])
 }
 //---------------------------------------------------------------------------------------------
 int criar_senhas_padrao()
-
 {
   FILE *arquivo;
   char nome_de_usuario_padrao[50];
