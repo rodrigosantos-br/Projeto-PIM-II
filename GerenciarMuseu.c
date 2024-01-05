@@ -46,7 +46,7 @@ void decrementar_tipo_de_ingresso_excluido(int indice_ingresso);
 void listar_venda();
 void incrementar_tipo_de_ingresso_vendido();
 void relatorio_de_venda();
-int numerar_ingresso();
+int numerar_sequencial();
 void imprimir_data_hora_atual();
 void ocultar_senha_entrada(char *senha, int comprimento_maximo);
 void criptografar_descriptografar(char senha[]);
@@ -104,7 +104,7 @@ int main()
         }
         else
         {
-          printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
+          printf("\n\t### Credenciais incorretas. Tente novamente.\n");
           getch();
         }        
         break;
@@ -123,18 +123,18 @@ int main()
         } 
         else
         {
-        printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
+        printf("\n\t### Credenciais incorretas. Tente novamente.\n");
         getch();
         }
         break;
       case '0':
         system("cls");
-        printf("\n\n\t\t\t ### Encerrando......\n");
+        printf("\n\n\t\t\t### Encerrando......\n");
         getch();
         exit(1);
         break;
       default:
-        printf("\n\t### Opção Inválida! Por favor digite uma opção ente 0 a 4.");
+        printf("\n\t### Opção Inválida! Por favor digite uma opção ente 0 e 4.");
         getch();
     }
   }while(opcao != '0');
@@ -272,7 +272,7 @@ void efetuar_nova_venda()
 {
   printf("\n\n\t\t\t\t### ** Nova Venda ** ###");
   printf("\n\n\t\t\t--------------- Ingresso %d ---------------\n\n", 
-          venda[quantidade_total_de_ingressos].ingresso = numerar_ingresso());
+          venda[quantidade_total_de_ingressos].ingresso = numerar_sequencial());
   imprimir_data_hora_atual();
   printf("\n\t\t\t### Digite o nome: ");
   scanf("\t %[^\n]", venda[quantidade_total_de_ingressos].nome);
@@ -357,9 +357,10 @@ void listar_venda()
             (venda[i].ingresso));
     printf("\t\t\t|------------------------------------------------------------------|\n");
     data_hora_venda = venda[i].data_hora;
-    printf("\t\t\t| Data: %02d/%02d/%02d   \t    Horário: %02d:%02d\t\t\t   |\n",
+    printf("\t\t\t| Data: %02d/%02d/%02d  -  Horário: %02d:%02d  -  Tipo de Ingresso: %-7s|\n",
             data_hora_venda.tm_mday, data_hora_venda.tm_mon + 1, data_hora_venda.tm_year + 1900,
-            data_hora_venda.tm_hour, data_hora_venda.tm_min);          
+            data_hora_venda.tm_hour, data_hora_venda.tm_min, 
+            venda[i].tipo_de_ingresso);          
     printf("\t\t\t| Nome:.................... %-39s|\n", venda[i].nome);
     printf("\t\t\t| Idade:................... %d anos \t\t\t\t   |\n", venda[i].idade);
     printf("\t\t\t| Preço:................... R$%.2f \t\t\t\t   |\n", venda[i].preco);
@@ -389,7 +390,7 @@ void relatorio_de_venda()
   getch();
 }
 //---------------------------------------------------------------------------------------------
-int numerar_ingresso() 
+int numerar_sequencial() 
 {
   static int numero_sequencial = 1;
   return numero_sequencial++;
@@ -853,11 +854,12 @@ void listar_acervo()
            nome, fabricante, data_de_fabricacao, conservacao, importancia_historica);
     
     printf("\n-------------------------------------------------------------------------------------------------");
-    printf("\n### Nome:\n   • %s\n", nome);
-    printf("\n### Fabricante:\n   •%s\n", fabricante);
-    printf("\n### Data de Fabricação:\n   • %s\n", data_de_fabricacao);
-    printf("\n### Conservação:\n   •%s\n", conservacao);
-    printf("\n### Importância Histórica:\n   • %s\n", importancia_historica);
+    printf("\n### Nome:\t\t\t %s", nome);
+    printf("\n### Fabricante:\t\t\t%s", fabricante);
+    printf("\n### Data de Fabricação:\t\t%s", data_de_fabricacao);
+    printf("\n### Conservação:\t\t%s", conservacao);
+    printf("\n### Importância Histórica:\t%s", importancia_historica);
+    printf("\n-------------------------------------------------------------------------------------------------");
     linhas_lidas++;
   }
 
