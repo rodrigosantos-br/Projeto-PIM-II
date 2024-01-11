@@ -1,3 +1,4 @@
+// *** Bibliotecas Auxiliares ***
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -7,19 +8,21 @@
 #include <time.h>
 #include <stdbool.h>
 
+// *** Estrutura das Obras ***
 typedef struct Obras
 {
   char nome[50];
   char fabricante[50];
   char data_de_fabricacao[11];
   char conservacao[30];
-  char importancia_historica[1000];
+  char importancia_historica[500];
 } obras;
 
+// *** Estrutura das Vendas ***
 struct Vendas
 {  
   int ingresso;
-  char nome[100];
+  char nome[50];
   int idade;
   float preco;
   char forma_de_pagamento[30];
@@ -28,13 +31,15 @@ struct Vendas
   bool vendido; // Para marcar se o ingresso foi vendido ou não.
 } venda[1000];
 
+// *** Estrutura para Salvar o Horário da Venda no Ingresso ***
 struct tm data_hora_venda;
 
-float preco_do_ingresso_atual = 20.00;
+// *** Variáveis Globais ***
+float preco_do_ingresso_atual = 0.00;
 int quantidade_total_de_obras=0;
 int quantidade_total_de_ingressos=0;
 int ingresso_inteiro = 0, ingresso_meia = 0, ingresso_isento = 0;
-int ingresso_nao_cadastrados = 0;  
+
 // ### Protótipos das Funções ###
 int main();
 void menu_administrativo();
@@ -46,7 +51,7 @@ void decrementar_tipo_de_ingresso_excluido(int indice_ingresso);
 void listar_venda();
 void incrementar_tipo_de_ingresso_vendido();
 void relatorio_de_venda();
-int numerar_ingresso();
+int numerar_sequencial();
 void imprimir_data_hora_atual();
 void ocultar_senha_entrada(char *senha, int comprimento_maximo);
 void criptografar_descriptografar(char senha[]);
@@ -70,12 +75,16 @@ void listar_clientes();
 //---------------------------------------------------------------------------------------------
 int main() 
 {
-  setlocale(LC_ALL, "es_US.UTF-8");
+  // Coloca o enconding para UTF-8 para exibir acentuação
+  setlocale(LC_ALL, "pt_BR.UTF-8");
+
+  // Criar nome de usuário e senha no primeiro acesso
   if (criar_senhas_padrao()) 
   {
     main();
     return -1; // Primeiro acesso
   }
+
   char opcao;
   do 
   {
@@ -107,7 +116,7 @@ int main()
         }
         else
         {
-          printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
+          printf("\n\t### Credenciais incorretas. Tente novamente.\n");
           getch();
         }        
         break;
@@ -122,22 +131,22 @@ int main()
         exibir_logotipo();
         if (autenticar_usuario()) 
         {
-        menu_administrativo();
+          menu_administrativo();
         } 
         else
         {
-        printf("\n\t ### Credenciais incorretas. Tente novamente.\n");
-        getch();
+          printf("\n\t### Credenciais incorretas. Tente novamente.\n");
+          getch();
         }
         break;
       case '0':
         system("cls");
-        printf("\n\n\t\t\t ### Encerrando......\n");
+        printf("\n\n\t\t\t### Encerrando......\n");
         getch();
         exit(1);
         break;
       default:
-        printf("\n\t### Opção Inválida! Por favor digite uma opção ente 0 a 4.");
+        printf("\n\t### Opção Inválida! Por favor digite uma opção ente 0 e 4.");
         getch();
     }
   }while(opcao != '0');
@@ -195,13 +204,13 @@ void menu_administrativo()
         exibir_logotipo();
         if (trocar_senha()) 
         {
-        printf("\n\t### Senha alterada com sucesso.\n");
-        getch();
+          printf("\n\t### Senha alterada com sucesso.\n");
+          getch();
         } 
         else 
         {
-        printf("\t### Falha ao trocar a senha.\n");
-        getch();
+          printf("\t### Falha ao trocar a senha.\n");
+          getch();
         }
         fflush(stdin);
         break;
@@ -277,7 +286,7 @@ void efetuar_nova_venda()
 {
   printf("\n\n\t\t\t\t### ** Nova Venda ** ###");
   printf("\n\n\t\t\t--------------- Ingresso %d ---------------\n\n", 
-          venda[quantidade_total_de_ingressos].ingresso = numerar_ingresso());
+          venda[quantidade_total_de_ingressos].ingresso = numerar_sequencial());
   imprimir_data_hora_atual();
   printf("\n\t\t\t### Digite o nome: ");
   scanf("\t %[^\n]", venda[quantidade_total_de_ingressos].nome);
@@ -286,14 +295,10 @@ void efetuar_nova_venda()
   printf("\t\t\t### Digite a idade: ");
   scanf("%d", &venda[quantidade_total_de_ingressos].idade);        
   getchar();
-
   verificar_forma_de_pagamento(venda[quantidade_total_de_ingressos].idade, 
                                venda[quantidade_total_de_ingressos].forma_de_pagamento);
-
   verificar_tipo_de_ingresso(venda[quantidade_total_de_ingressos].idade);
-
   calcular_preco_do_ingresso(venda[quantidade_total_de_ingressos].tipo_de_ingresso);
-  
 }
 //---------------------------------------------------------------------------------------------
 void excluir_venda() 
@@ -321,9 +326,6 @@ void excluir_venda()
     // Sobrescrever os dados do ingresso a ser excluído com os dados do último ingresso
     venda[indice_ingresso] = venda[quantidade_total_de_ingressos - 1];
 
-    // Decrementar o contador de vendas
-    quantidade_total_de_ingressos--;
-
     printf("\n\t### Venda do Ingresso %d excluída com sucesso!", numero_do_ingresso);
     getch();
   } 
@@ -349,6 +351,8 @@ void decrementar_tipo_de_ingresso_excluido(int indice_ingresso)
   {
     ingresso_isento--;
   }
+  // Decrementar o contador de vendas
+  quantidade_total_de_ingressos--;
 }
 //---------------------------------------------------------------------------------------------
 void listar_venda()
@@ -362,9 +366,10 @@ void listar_venda()
             (venda[i].ingresso));
     printf("\t\t\t|------------------------------------------------------------------|\n");
     data_hora_venda = venda[i].data_hora;
-    printf("\t\t\t| Data: %02d/%02d/%02d   \t    Horário: %02d:%02d\t\t\t   |\n",
+    printf("\t\t\t| Data: %02d/%02d/%02d  -  Horário: %02d:%02d  -  Tipo de Ingresso: %-7s|\n",
             data_hora_venda.tm_mday, data_hora_venda.tm_mon + 1, data_hora_venda.tm_year + 1900,
-            data_hora_venda.tm_hour, data_hora_venda.tm_min);          
+            data_hora_venda.tm_hour, data_hora_venda.tm_min, 
+            venda[i].tipo_de_ingresso);          
     printf("\t\t\t| Nome:.................... %-39s|\n", venda[i].nome);
     printf("\t\t\t| Idade:................... %d anos \t\t\t\t   |\n", venda[i].idade);
     printf("\t\t\t| Preço:................... R$%.2f \t\t\t\t   |\n", venda[i].preco);
@@ -394,7 +399,7 @@ void relatorio_de_venda()
   getch();
 }
 //---------------------------------------------------------------------------------------------
-int numerar_ingresso() 
+int numerar_sequencial() 
 {
   static int numero_sequencial = 1;
   return numero_sequencial++;
@@ -420,7 +425,7 @@ void ocultar_senha_entrada(char *senha, int comprimento_maximo)
 {
   int i = 0;
 
-  while (1) 
+  while (true) 
   {
     senha[i] = getch();
     if (senha[i] == '\r' || senha[i] == '\n') 
@@ -458,7 +463,6 @@ void criptografar_descriptografar(char senha[])
 }
 //---------------------------------------------------------------------------------------------
 int criar_senhas_padrao()
-
 {
   FILE *arquivo;
   char nome_de_usuario_padrao[50];
@@ -608,6 +612,7 @@ void formatar_nome(char *nome_completo)
     // Verifica se o caractere anterior é um espaço e se o caractere atual é uma letra
     if (nome_completo[i - 1] == ' ' && isalpha(nome_completo[i])) 
     {
+      // Tranforma o primeiro caracterer dos sobrenomes em maiúscula
       nome_completo[i] = toupper(nome_completo[i]);
     }
   }
@@ -858,11 +863,12 @@ void listar_acervo()
            nome, fabricante, data_de_fabricacao, conservacao, importancia_historica);
     
     printf("\n-------------------------------------------------------------------------------------------------");
-    printf("\n### Nome:\n   • %s\n", nome);
-    printf("\n### Fabricante:\n   •%s\n", fabricante);
-    printf("\n### Data de Fabricação:\n   • %s\n", data_de_fabricacao);
-    printf("\n### Conservação:\n   •%s\n", conservacao);
-    printf("\n### Importância Histórica:\n   • %s\n", importancia_historica);
+    printf("\n### Nome:\t\t\t %s", nome);
+    printf("\n### Fabricante:\t\t\t%s", fabricante);
+    printf("\n### Data de Fabricação:\t\t%s", data_de_fabricacao);
+    printf("\n### Conservação:\t\t%s", conservacao);
+    printf("\n### Importância Histórica:\t%s", importancia_historica);
+    printf("\n-------------------------------------------------------------------------------------------------");
     linhas_lidas++;
   }
 
