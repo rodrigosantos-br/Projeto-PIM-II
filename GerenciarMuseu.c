@@ -34,7 +34,7 @@ float preco_do_ingresso_atual = 20.00;
 int quantidade_total_de_obras=0;
 int quantidade_total_de_ingressos=0;
 int ingresso_inteiro = 0, ingresso_meia = 0, ingresso_isento = 0;
-
+int ingresso_nao_cadastrados = 0;  
 // ### Protótipos das Funções ###
 int main();
 void menu_administrativo();
@@ -63,6 +63,9 @@ void alterar_preco_do_ingresso(float novo_preco);
 void adicionar_acervo();
 void excluir_acervo();
 void listar_acervo();
+void venda_nao_salva_nome();
+void verificar_se_o_usuario_queira_fornecer_o_nome_ou_nao();
+void listar_clientes();
 
 //---------------------------------------------------------------------------------------------
 int main() 
@@ -92,7 +95,7 @@ int main()
       case '1':
         system("cls");        
         exibir_logotipo();
-        efetuar_nova_venda();
+        verificar_se_o_usuario_queira_fornecer_o_nome_ou_nao();
         incrementar_tipo_de_ingresso_vendido();
         break;
       case '2':
@@ -176,8 +179,10 @@ void menu_administrativo()
         getch();
         break;
       case '3':
-        //TODO
-        // **Adicionar código para listar os clientes**
+      system("cls");
+        exibir_logotipo();
+        listar_clientes();
+        getch();
         break;
       case '4':
         system("cls");
@@ -869,3 +874,52 @@ void listar_acervo()
   }
 }
 //---------------------------------------------------------------------------------------------
+void venda_nao_salva_nome()
+{
+  printf("Digite sua idade para que possa pegar o ingresso correspondente");
+  int idade;
+  scanf("\n%d",&idade);
+  char tipo_ingresso[10] = "";
+  if(idade <= 16)
+  {
+    tipo_ingresso[10] = "Meia";
+    ingresso_nao_cadastrados++;
+  }
+  else if(idade >= 60 && idade <= 110)
+  {
+     tipo_ingresso[10] = "Isento";
+     ingresso_nao_cadastrados++;
+  }
+  else
+  {
+   tipo_ingresso[10] = "Inteiro";
+   ingresso_nao_cadastrados++;
+  }
+  calcular_preco_do_ingresso(tipo_ingresso[10]);
+}
+void verificar_se_o_usuario_queira_fornecer_o_nome_ou_nao()
+{
+  printf("Gostaria de fornecer seunome para ficar salvo em nosso cadastro? \n 1-SIM      ||    2-NÂO\napenas numero");
+  char escolha;
+  scanf("\n%c",&escolha);
+  if(escolha == '1')
+  {
+    efetuar_nova_venda();
+  }
+  else if(escolha == '2')
+  {
+    venda_nao_salva_nome();
+  }
+  else
+  { 
+    verificar_se_o_usuario_queira_fornecer_o_nome_ou_nao();
+  }
+  
+}
+void listar_clientes()
+{
+  for(int cont = 0; cont < quantidade_total_de_ingressos;cont++)
+  {
+    printf("\nCliente n° %d    Nome: %s   Idade: %d\n",cont,venda[cont].nome,venda[cont].idade);
+  }
+}
